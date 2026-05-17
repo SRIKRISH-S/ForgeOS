@@ -2,7 +2,10 @@ import 'dotenv/config';
 import fetch from 'node-fetch';
 
 const LOCUS_API_BASE = 'https://api.locusfinance.io/v1';
-const DEMO_MODE = process.env.DEMO_MODE === 'true';
+const DEMO_MODE = process.env.DEMO_MODE === 'true' || 
+                  !process.env.LOCUS_API_KEY || 
+                  process.env.LOCUS_API_KEY.includes('your_locus_api_key_here') ||
+                  process.env.LOCUS_API_KEY === '';
 
 // ============================================================
 // LOCUS CHECKOUT INTEGRATION

@@ -4,6 +4,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
   const [selectedService, setSelectedService] = useState(null);
   const [orderForm, setOrderForm] = useState({ customerName: '', customerEmail: '', requirements: '' });
   const [orderState, setOrderState] = useState('idle'); // idle | submitting | success | error
+  const [orderError, setOrderError] = useState('');
   const [lastOrder, setLastOrder] = useState(null);
   const [chatMsg, setChatMsg] = useState('');
   const [chatHistory, setChatHistory] = useState([
@@ -36,9 +37,11 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
         setOrderState('success');
         setOrderForm({ customerName: '', customerEmail: '', requirements: '' });
       } else {
+        setOrderError(result.error || 'Something went wrong. Please try again.');
         setOrderState('error');
       }
-    } catch {
+    } catch (err) {
+      setOrderError(err.message || 'Something went wrong. Please try again.');
       setOrderState('error');
     }
   };
@@ -231,7 +234,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
                 </button>
                 {orderState === 'error' && (
                   <div style={{ fontSize: 12, color: 'var(--red)', textAlign: 'center' }}>
-                    Something went wrong. Please try again.
+                    {orderError}
                   </div>
                 )}
               </form>
