@@ -17,8 +17,36 @@ export default function App() {
   useEffect(() => {
     fetch(`${API}/business`)
       .then(r => r.json())
-      .then(b => { if (b.id) { setBusiness(b); setView('storefront'); } })
-      .catch(() => {});
+      .then(async (b) => { 
+        if (b.id) { 
+          setBusiness(b); 
+          setView('storefront'); 
+          localStorage.setItem('forgeos_business', JSON.stringify(b));
+        } else {
+          // Check localStorage
+          const saved = localStorage.getItem('forgeos_business');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            setBusiness(parsed);
+            setView('storefront');
+            // Restore backend
+            await fetch(`${API}/business/restore`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: saved
+            });
+          }
+        }
+      })
+      .catch(async () => {
+        // Fallback to localStorage if server is offline/error
+        const saved = localStorage.getItem('forgeos_business');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setBusiness(parsed);
+          setView('storefront');
+        }
+      });
   }, []);
 
   // Poll logs and orders when business is active
@@ -31,6 +59,20 @@ export default function App() {
           fetch(`${API}/orders`).then(r => r.json()),
           fetch(`${API}/finance/wallet`).then(r => r.json()),
         ]);
+        
+        // If the backend has reset and returned error 'No business active', restore it!
+        if (logsRes.error === 'No business active' || ordersRes.error === 'No business active') {
+          const saved = localStorage.getItem('forgeos_business');
+          if (saved) {
+            await fetch(`${API}/business/restore`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: saved
+            });
+          }
+          return;
+        }
+        
         setLogs(logsRes);
         setOrders(ordersRes);
         setWallet(walletRes);
@@ -51,6 +93,7 @@ export default function App() {
       if (data.success) {
         setBusiness(data.business);
         setView('storefront');
+        localStorage.setItem('forgeos_business', JSON.stringify(data.business));
       }
     } catch (err) {
       console.error(err);
@@ -60,12 +103,34 @@ export default function App() {
   }, []);
 
   const placeOrder = useCallback(async (orderData) => {
-    const res = await fetch(`${API}/orders`, {
+    let res = await fetch(`${API}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
     });
-    return res.json();
+    let data = await res.json();
+    
+    // If backend restarted and lost the business config, restore and retry once!
+    if (data.error === 'No business active') {
+      const saved = localStorage.getItem('forgeos_business');
+      if (saved) {
+        const b = JSON.parse(saved);
+        // Restore business config
+        await fetch(`${API}/business/restore`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(b)
+        });
+        // Retry placing order
+        res = await fetch(`${API}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+        data = await res.json();
+      }
+    }
+    return data;
   }, []);
 
   const fulfillOrder = useCallback(async (orderId) => {

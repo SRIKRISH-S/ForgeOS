@@ -108,6 +108,22 @@ app.get('/api/business/insight', async (req, res) => {
 // SALES AGENT / ORDER ROUTES
 // ============================================================
 
+// POST /api/business/restore - Restore business configuration if backend restarted
+app.post('/api/business/restore', async (req, res) => {
+  try {
+    const business = req.body;
+    if (!business || !business.id) return res.status(400).json({ error: 'Invalid business config' });
+    await updateDb(currentDb => {
+      currentDb.currentBusiness = business;
+      return currentDb;
+    });
+    await addLog('System', `Business configuration restored: ${business.businessName}`, 'info');
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/orders - Create a new order
 app.post('/api/orders', async (req, res) => {
   try {
