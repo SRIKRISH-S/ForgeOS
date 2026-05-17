@@ -85,7 +85,7 @@ Format with clear sections. Be specific, creative, and professional. Minimum 300
   return {
     deliverable,
     fileName,
-    fileUrl: `/deliverables/${fileName}`,
+    fileUrl: process.env.VERCEL ? `/api/deliverables/${fileName}` : `/deliverables/${fileName}`,
     emailPreviewUrl,
     fulfilledAt: new Date().toISOString(),
     agentUsed: 'FulfillmentAgent v2.1'

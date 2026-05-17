@@ -15,7 +15,14 @@ const PORT = process.env.PORT || 3001;
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 const publicDir = process.env.VERCEL ? '/tmp/deliverables' : 'public';
-app.use(process.env.VERCEL ? '/deliverables' : '/', express.static(publicDir));
+app.use(process.env.VERCEL ? '/api/deliverables' : '/', express.static(publicDir));
+
+app.use((req, res, next) => {
+  if (process.env.VERCEL && !req.url.startsWith('/api')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
 
 // ============================================================
 // Database Logic
