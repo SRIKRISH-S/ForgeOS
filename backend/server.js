@@ -14,7 +14,8 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
-app.use(express.static('public')); // Serve deliverables
+const publicDir = process.env.VERCEL ? '/tmp/deliverables' : 'public';
+app.use(process.env.VERCEL ? '/deliverables' : '/', express.static(publicDir));
 
 // ============================================================
 // Database Logic
@@ -376,8 +377,9 @@ app.get('/api/agents/activity', async (req, res) => {
 // ============================================================
 // SERVER START
 // ============================================================
-app.listen(PORT, () => {
-  console.log(`
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`
 ╔═══════════════════════════════════════╗
 ║         ForgeOS Backend v1.0          ║
 ║   Autonomous AI Business Engine       ║
@@ -385,5 +387,8 @@ app.listen(PORT, () => {
 ║  Server: http://localhost:${PORT}         ║
 ║  Demo Mode: ${process.env.DEMO_MODE === 'true' ? 'YES (simulated payments)' : 'NO (live Locus)  '}  ║
 ╚═══════════════════════════════════════╝
-  `);
-});
+    `);
+  });
+}
+
+export default app;

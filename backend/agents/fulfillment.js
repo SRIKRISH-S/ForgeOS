@@ -75,7 +75,7 @@ Format with clear sections. Be specific, creative, and professional. Minimum 300
   
   // Save as file for download
   const fileName = `deliverable_${order.id.slice(0, 8)}.md`;
-  const publicDir = path.join(process.cwd(), 'public', 'deliverables');
+  const publicDir = process.env.VERCEL ? path.join('/tmp', 'deliverables') : path.join(process.cwd(), 'public', 'deliverables');
   await fs.mkdir(publicDir, { recursive: true });
   await fs.writeFile(path.join(publicDir, fileName), deliverable);
 
