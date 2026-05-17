@@ -15,6 +15,19 @@ export default function App() {
 
   // Fetch business on load
   useEffect(() => {
+    // Load local cache immediately for zero-flicker UI
+    const savedBus = localStorage.getItem('forgeos_business');
+    const savedOrders = localStorage.getItem('forgeos_orders');
+    const savedLogs = localStorage.getItem('forgeos_logs');
+    
+    if (savedBus) {
+      const parsedBus = JSON.parse(savedBus);
+      setBusiness(parsedBus);
+      setView('storefront');
+      if (savedOrders) setOrders(JSON.parse(savedOrders));
+      if (savedLogs) setLogs(JSON.parse(savedLogs));
+    }
+
     fetch(`${API}/business`)
       .then(r => r.json())
       .then(async (b) => { 
@@ -23,29 +36,31 @@ export default function App() {
           setView('storefront'); 
           localStorage.setItem('forgeos_business', JSON.stringify(b));
         } else {
-          // Check localStorage
+          // Check localStorage to restore empty backend
           const saved = localStorage.getItem('forgeos_business');
           if (saved) {
             const parsed = JSON.parse(saved);
             setBusiness(parsed);
             setView('storefront');
-            // Restore backend
+            
+            const localOrders = localStorage.getItem('forgeos_orders') || '[]';
+            const localLogs = localStorage.getItem('forgeos_logs') || '[]';
+            
+            // Restore backend with full database dump
             await fetch(`${API}/business/restore`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: saved
+              body: JSON.stringify({
+                currentBusiness: parsed,
+                orders: JSON.parse(localOrders),
+                agentLogs: JSON.parse(localLogs)
+              })
             });
           }
         }
       })
       .catch(async () => {
-        // Fallback to localStorage if server is offline/error
-        const saved = localStorage.getItem('forgeos_business');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setBusiness(parsed);
-          setView('storefront');
-        }
+        // Fallback to localStorage already set above
       });
   }, []);
 
@@ -64,22 +79,41 @@ export default function App() {
         if (logsRes.error === 'No business active' || ordersRes.error === 'No business active') {
           const saved = localStorage.getItem('forgeos_business');
           if (saved) {
+            const parsed = JSON.parse(saved);
+            const savedOrders = localStorage.getItem('forgeos_orders') || '[]';
+            const savedLogs = localStorage.getItem('forgeos_logs') || '[]';
+            
             await fetch(`${API}/business/restore`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: saved
+              body: JSON.stringify({
+                currentBusiness: parsed,
+                orders: JSON.parse(savedOrders),
+                agentLogs: JSON.parse(savedLogs)
+              })
             });
           }
           return;
         }
         
-        setLogs(logsRes);
-        setOrders(ordersRes);
-        setWallet(walletRes);
+        // Defensive synchronization: prevent overwriting local state with empty responses from fresh containers
+        if (Array.isArray(logsRes) && (logsRes.length >= logs.length || logs.length === 0)) {
+          setLogs(logsRes);
+          localStorage.setItem('forgeos_logs', JSON.stringify(logsRes));
+        }
+        
+        if (Array.isArray(ordersRes) && (ordersRes.length >= orders.length || orders.length === 0)) {
+          setOrders(ordersRes);
+          localStorage.setItem('forgeos_orders', JSON.stringify(ordersRes));
+        }
+        
+        if (walletRes && !walletRes.error) {
+          setWallet(walletRes);
+        }
       } catch {}
     }, 3000);
     return () => clearInterval(poll);
-  }, [business]);
+  }, [business, orders.length, logs.length]);
 
   const launchBusiness = useCallback(async (prompt) => {
     setLoading(true);
@@ -92,8 +126,12 @@ export default function App() {
       const data = await res.json();
       if (data.success) {
         setBusiness(data.business);
+        setOrders([]);
+        setLogs([]);
         setView('storefront');
         localStorage.setItem('forgeos_business', JSON.stringify(data.business));
+        localStorage.setItem('forgeos_orders', '[]');
+        localStorage.setItem('forgeos_logs', '[]');
       }
     } catch (err) {
       console.error(err);
@@ -103,43 +141,84 @@ export default function App() {
   }, []);
 
   const placeOrder = useCallback(async (orderData) => {
+    const saved = localStorage.getItem('forgeos_business');
+    const businessObj = saved ? JSON.parse(saved) : null;
+    
     let res = await fetch(`${API}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
+      body: JSON.stringify({
+        ...orderData,
+        business: businessObj
+      })
     });
     let data = await res.json();
     
     // If backend restarted and lost the business config, restore and retry once!
     if (data.error === 'No business active') {
-      const saved = localStorage.getItem('forgeos_business');
       if (saved) {
         const b = JSON.parse(saved);
+        const savedOrders = localStorage.getItem('forgeos_orders') || '[]';
+        const savedLogs = localStorage.getItem('forgeos_logs') || '[]';
+        
         // Restore business config
         await fetch(`${API}/business/restore`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(b)
+          body: JSON.stringify({
+            currentBusiness: b,
+            orders: JSON.parse(savedOrders),
+            agentLogs: JSON.parse(savedLogs)
+          })
         });
+        
         // Retry placing order
         res = await fetch(`${API}/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderData)
+          body: JSON.stringify({
+            ...orderData,
+            business: b
+          })
         });
         data = await res.json();
       }
+    }
+    
+    if (data.success && data.order) {
+      setOrders(prev => {
+        const updated = [...prev, data.order];
+        localStorage.setItem('forgeos_orders', JSON.stringify(updated));
+        return updated;
+      });
     }
     return data;
   }, []);
 
   const fulfillOrder = useCallback(async (orderId) => {
+    const saved = localStorage.getItem('forgeos_business');
+    const businessObj = saved ? JSON.parse(saved) : null;
+    const orderObj = orders.find(o => o.id === orderId);
+    
     const res = await fetch(`${API}/orders/${orderId}/fulfill`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        business: businessObj,
+        order: orderObj
+      })
     });
-    return res.json();
-  }, []);
+    const data = await res.json();
+    
+    if (data.success && data.order) {
+      setOrders(prev => {
+        const updated = prev.map(o => o.id === orderId ? data.order : o);
+        localStorage.setItem('forgeos_orders', JSON.stringify(updated));
+        return updated;
+      });
+    }
+    return data;
+  }, [orders]);
 
   return (
     <div>

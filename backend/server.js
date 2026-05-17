@@ -111,10 +111,22 @@ app.get('/api/business/insight', async (req, res) => {
 // POST /api/business/restore - Restore business configuration if backend restarted
 app.post('/api/business/restore', async (req, res) => {
   try {
-    const business = req.body;
+    const payload = req.body;
+    if (!payload) return res.status(400).json({ error: 'Invalid restore payload' });
+    
+    // Support both full database restore or single business restore
+    const isFullDump = payload.currentBusiness !== undefined;
+    const business = isFullDump ? payload.currentBusiness : payload;
+    
     if (!business || !business.id) return res.status(400).json({ error: 'Invalid business config' });
+    
     await updateDb(currentDb => {
       currentDb.currentBusiness = business;
+      if (isFullDump) {
+        if (payload.orders) currentDb.orders = payload.orders;
+        if (payload.agentLogs) currentDb.agentLogs = payload.agentLogs;
+        if (payload.chatHistory) currentDb.chatHistory = payload.chatHistory;
+      }
       return currentDb;
     });
     await addLog('System', `Business configuration restored: ${business.businessName}`, 'info');
@@ -127,7 +139,15 @@ app.post('/api/business/restore', async (req, res) => {
 // POST /api/orders - Create a new order
 app.post('/api/orders', async (req, res) => {
   try {
-    const db = await readDb();
+    let db = await readDb();
+    
+    // Auto-restore business from client payload if missing due to serverless reset
+    if (!db.currentBusiness && req.body.business) {
+      db.currentBusiness = req.body.business;
+      await writeDb(db);
+      await addLog('System', `Business auto-restored in order request: ${db.currentBusiness.businessName}`, 'info');
+    }
+    
     if (!db.currentBusiness) return res.status(404).json({ error: 'No business active' });
     
     const { serviceId, customerName, customerEmail, requirements } = req.body;
@@ -176,8 +196,20 @@ app.post('/api/orders', async (req, res) => {
 // POST /api/orders/:id/fulfill - Trigger AI fulfillment
 app.post('/api/orders/:id/fulfill', async (req, res) => {
   try {
-    const db = await readDb();
-    const orderIndex = db.orders.findIndex(o => o.id === req.params.id);
+    let db = await readDb();
+    
+    // Defensive check: auto-insert order and business if missing due to serverless reset
+    let orderIndex = db.orders.findIndex(o => o.id === req.params.id);
+    if (orderIndex === -1 && req.body.order) {
+      db.orders.push(req.body.order);
+      if (req.body.business) {
+        db.currentBusiness = req.body.business;
+      }
+      await writeDb(db);
+      orderIndex = db.orders.length - 1;
+      await addLog('System', `Order auto-restored for fulfillment: ${req.params.id.slice(0, 8)}`, 'info');
+    }
+    
     if (orderIndex === -1) return res.status(404).json({ error: 'Order not found' });
 
     const order = db.orders[orderIndex];
@@ -220,8 +252,20 @@ app.get('/api/orders', async (req, res) => {
 app.post('/api/orders/:id/roadmap', async (req, res) => {
   try {
     const { architectBusiness: _ab, generateBusinessInsight } = await import('./agents/architect.js');
-    const db = await readDb();
-    const order = db.orders.find(o => o.id === req.params.id);
+    let db = await readDb();
+    
+    // Defensive check: auto-insert order and business if missing due to serverless reset
+    let order = db.orders.find(o => o.id === req.params.id);
+    if (!order && req.body.order) {
+      db.orders.push(req.body.order);
+      if (req.body.business) {
+        db.currentBusiness = req.body.business;
+      }
+      await writeDb(db);
+      order = req.body.order;
+      await addLog('System', `Order auto-restored for roadmap: ${req.params.id.slice(0, 8)}`, 'info');
+    }
+    
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
     const business = db.currentBusiness;
@@ -290,7 +334,15 @@ Make it specific to ${business.category} and genuinely actionable. Include 3-4 p
 // POST /api/chat - Sales agent chat
 app.post('/api/chat', async (req, res) => {
   try {
-    const db = await readDb();
+    let db = await readDb();
+    
+    // Auto-restore business from client payload if missing due to serverless reset
+    if (!db.currentBusiness && req.body.business) {
+      db.currentBusiness = req.body.business;
+      await writeDb(db);
+      await addLog('System', `Business auto-restored in chat request: ${db.currentBusiness.businessName}`, 'info');
+    }
+    
     if (!db.currentBusiness) return res.status(404).json({ error: 'No business active' });
     const { message } = req.body;
     

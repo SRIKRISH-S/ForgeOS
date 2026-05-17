@@ -57,7 +57,14 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
       if (order.roadmap) {
         setRoadmapData(d => ({ ...d, [order.id]: order.roadmap }));
       } else {
-        const res = await fetch(`/api/orders/${order.id}/roadmap`, { method: 'POST' });
+        const res = await fetch(`/api/orders/${order.id}/roadmap`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order,
+            business
+          })
+        });
         const data = await res.json();
         if (data.success) setRoadmapData(d => ({ ...d, [order.id]: data.roadmap }));
       }

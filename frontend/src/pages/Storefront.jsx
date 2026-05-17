@@ -57,7 +57,10 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg })
+        body: JSON.stringify({ 
+          message: userMsg,
+          business
+        })
       });
       const data = await res.json();
       setChatHistory(h => [...h, { role: 'agent', text: data.response }]);
@@ -176,7 +179,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
                 ← Select a service to order
               </div>
             ) : orderState === 'success' ? (
-              <OrderSuccess order={lastOrder} accent={primary} onReset={() => { setOrderState('idle'); setSelectedService(null); setLastOrder(null); }} />
+              <OrderSuccess order={lastOrder} accent={primary} business={business} onReset={() => { setOrderState('idle'); setSelectedService(null); setLastOrder(null); }} />
             ) : (
               <form onSubmit={handleOrder} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{
@@ -379,7 +382,7 @@ function ServiceCard({ service, selected, onSelect, accent }) {
   );
 }
 
-function OrderSuccess({ order, accent, onReset }) {
+function OrderSuccess({ order, accent, onReset, business }) {
   const [roadmap, setRoadmap] = useState(null);
   const [roadmapLoading, setRoadmapLoading] = useState(true);
   const [roadmapError, setRoadmapError] = useState(null);
@@ -390,7 +393,14 @@ function OrderSuccess({ order, accent, onReset }) {
     const fetchRoadmap = async () => {
       setRoadmapLoading(true);
       try {
-        const res = await fetch(`/api/orders/${order.id}/roadmap`, { method: 'POST' });
+        const res = await fetch(`/api/orders/${order.id}/roadmap`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order,
+            business
+          })
+        });
         const data = await res.json();
         if (data.success) setRoadmap(data.roadmap);
         else setRoadmapError('Could not generate roadmap.');
@@ -401,7 +411,7 @@ function OrderSuccess({ order, accent, onReset }) {
       }
     };
     fetchRoadmap();
-  }, [order?.id]);
+  }, [order?.id, business]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
