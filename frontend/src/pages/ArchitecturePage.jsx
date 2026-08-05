@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 const AGENT_NODES = [
   { id: 'orchestrator', name: 'OrchestratorAgent', role: 'Central Brain & Multi-Agent Planner', color: '#AAFF00', icon: '🧠', pos: { x: 50, y: 15 } },
   { id: 'architect', name: 'ArchitectAgent', role: 'Business & Service Tier Designer', color: '#7B8FFF', icon: '⚡', pos: { x: 20, y: 40 } },
-  { id: 'finance', name: 'FinanceAgent', role: 'Locus Wallet & Margin Auditor', color: '#FFB020', icon: '💰', pos: { x: 45, y: 40 } },
+  { id: 'finance', name: 'FinanceAgent', role: 'Digital Wallet & Margin Auditor', color: '#FFB020', icon: '💰', pos: { x: 45, y: 40 } },
   { id: 'sales', name: 'SalesAgent', role: 'Storefront & Demand Predictor', color: '#00E8CC', icon: '🛍', pos: { x: 70, y: 40 } },
   { id: 'fulfillment', name: 'FulfillmentAgent', role: 'AI Delivery & Artifact Generator', color: '#4080FF', icon: '🤖', pos: { x: 85, y: 70 } },
   { id: 'memory', name: 'MemoryAgent', role: 'Vector Knowledge & Customer Store', color: '#00E8CC', icon: '💾', pos: { x: 15, y: 70 } },

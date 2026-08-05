@@ -197,7 +197,7 @@
     {
       "id": "03e3117f-909e-434b-b466-fc2d54066d96",
       "agent": "FinanceAgent",
-      "message": "Locus wallet connected — revenue routing configured",
+      "message": "Digital wallet connected — revenue routing configured",
       "type": "success",
       "timestamp": "2026-08-05T06:16:38.182Z"
     },
@@ -246,7 +246,7 @@
     {
       "id": "969fc05d-7187-49a1-97bb-c65073315978",
       "agent": "FinanceAgent",
-      "message": "Locus wallet connected — revenue routing configured",
+      "message": "Digital wallet connected — revenue routing configured",
       "type": "success",
       "timestamp": "2026-07-24T08:30:06.484Z"
     },
@@ -351,7 +351,7 @@
     {
       "id": "5eb02f9f-f5df-4921-9681-04d12e0d2deb",
       "agent": "FinanceAgent",
-      "message": "Locus wallet connected — revenue routing configured",
+      "message": "Digital wallet connected — revenue routing configured",
       "type": "success",
       "timestamp": "2026-05-07T09:10:02.788Z"
     },
@@ -491,7 +491,7 @@
     {
       "id": "d73b3eb7-8974-414e-9c5a-c20c72d655af",
       "agent": "FinanceAgent",
-      "message": "Locus wallet connected — revenue routing configured",
+      "message": "Digital wallet connected — revenue routing configured",
       "type": "success",
       "timestamp": "2026-05-06T16:40:21.271Z"
     },

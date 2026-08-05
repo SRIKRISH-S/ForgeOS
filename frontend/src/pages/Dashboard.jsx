@@ -105,7 +105,7 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>LOCUS WALLET</div>
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>FORGEOS WALLET</div>
             <div style={{ fontSize: 22, fontFamily: 'var(--font-display)', color: 'var(--amber)' }}>
               ${wallet?.balance?.toFixed(2) || totalRevenue.toFixed(2)}
             </div>
@@ -142,7 +142,7 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
                     { name: 'ArchitectAgent', status: 'active', activity: 'Designing service tiers & business architecture...' },
                     { name: 'SalesAgent', status: 'active', activity: 'Handling customer storefront inquiries...' },
                     { name: 'FulfillmentAgent', status: 'active', activity: 'Executing automated service deliverables...' },
-                    { name: 'FinanceAgent', status: 'active', activity: 'Auditing margin profitability & Locus wallet...' },
+                    { name: 'FinanceAgent', status: 'active', activity: 'Auditing margin profitability & digital wallet...' },
                     { name: 'MemoryAgent', status: 'active', activity: 'Indexing long-term knowledge & customer profiles...' },
                     { name: 'ReflectionAgent', status: 'active', activity: 'Evaluating execution outcomes & learnings...' },
                     { name: 'CEOAgent', status: 'active', activity: 'Monitoring business health & growth strategy...' }

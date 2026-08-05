@@ -12,7 +12,7 @@ const EXAMPLES = [
 const COLLABORATIVE_AGENT_STEPS = [
   { agent: 'OrchestratorAgent', msg: 'Decomposing prompt & retrieving MemoryAgent learnings...' },
   { agent: 'ArchitectAgent', msg: 'Formulating initial brand identity and service tier hierarchy...' },
-  { agent: 'FinanceAgent', msg: 'Auditing pricing elasticity, margins, and Locus wallet connectivity...' },
+  { agent: 'FinanceAgent', msg: 'Auditing pricing elasticity, margins, and digital wallet revenue routing...' },
   { agent: 'SalesAgent', msg: 'Simulating customer demand & predicting storefront conversion...' },
   { agent: 'ArchitectAgent', msg: 'Applying inter-agent adjustments to service descriptions...' },
   { agent: 'ReflectionAgent', msg: 'Executing quality audit & vulnerability validation...' },

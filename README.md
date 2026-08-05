@@ -15,7 +15,7 @@ ForgeOS turns any business prompt into an autonomous, self-sustaining digital en
 | **OrchestratorAgent** | Central Brain & Coordinator | Prompt decomposition, multi-agent execution planning, self-healing error retries, task assignment |
 | **ArchitectAgent** | Business & Service Designer | Brand identity generation, tagline crafting, service tier packaging, pricing architecture |
 | **SalesAgent** | Storefront & Demand Specialist | Customer inquiry handling, storefront conversion optimization, sales demand forecasting |
-| **FinanceAgent** | Locus Wallet & Revenue Manager | Locus Checkout integration, margin elasticity audit, automated revenue routing |
+| **FinanceAgent** | Digital Credit & Revenue Manager | Instant Digital Pay integration, margin elasticity audit, automated revenue routing |
 | **FulfillmentAgent** | AI Service Delivery Pipeline | Automated deliverable artifact generation, file export (.md), Nodemailer transaction simulation |
 | **MemoryAgent** | Long-Term Knowledge Store | Customer profile tracking, historical decision index, semantic memory retrieval before every turn |
 | **ReflectionAgent** | Quality Audit & Learning Loop | Post-fulfillment quality scoring (0-100), mistake detection, actionable learning extraction |
@@ -69,7 +69,6 @@ Every agent execution produces a structured reasoning step:
 ### Prerequisites
 - Node.js 18+
 - Groq API Key ([Get one here](https://console.groq.com/keys))
-- Locus Account / API Key ([locusfinance.io](https://locusfinance.io)) — *or run in `DEMO_MODE`*
 
 ### 1. Clone & Install Dependencies
 
@@ -95,12 +94,7 @@ Edit `backend/.env`:
 ```env
 GROQ_API_KEY=gsk_your_groq_api_key
 
-# Locus Wallet & Checkout Integration
-LOCUS_API_KEY=your_locus_api_key
-LOCUS_WEBHOOK_SECRET=your_webhook_secret
-LOCUS_WALLET_ID=your_wallet_id
-
-# Set to true to run with simulated payments & wallet
+# Set to true to run with simulated instant digital payments & wallet
 DEMO_MODE=true
 ```
 
@@ -125,7 +119,7 @@ Navigate to [http://localhost:5173](http://localhost:5173) in your browser.
 ## 🌐 Platform Pages & Navigation
 
 1. **Launch**: Single-prompt business creation with live multi-agent collaborative negotiation trace.
-2. **Storefront**: Customer-facing digital agency storefront with AI sales agent chat & Locus Checkout payment integration.
+2. **Storefront**: Customer-facing digital agency storefront with AI sales agent chat & Instant Digital Pay integration.
 3. **Dashboard**: Agent Command Center featuring live statuses across all 8 agents, order fulfillment queue, and activity feed.
 4. **Memory**: Long-term knowledge explorer showing learned insights, customer profiles, decision history, and memory search.
 5. **CEO Dashboard**: Executive command center displaying Business Health Index, Growth Score, 24h revenue timeline, autonomous decision log, and risk radar.
@@ -145,7 +139,7 @@ ForgeOS/
 │   │   ├── architect.js       — ArchitectAgent (Business & service tier design)
 │   │   ├── sales.js           — SalesAgent (Storefront inquiries & demand prediction)
 │   │   ├── fulfillment.js     — FulfillmentAgent (Service delivery & artifact creation)
-│   │   ├── finance.js         — FinanceAgent (Locus Checkout & wallet management)
+│   │   ├── finance.js         — FinanceAgent (Digital wallet & revenue routing)
 │   │   ├── memory.js          — MemoryAgent (Long-term vector/keyword knowledge store)
 │   │   ├── reflection.js      — ReflectionAgent (Quality scoring & learning loop)
 │   │   └── ceo.js             — CEOAgent (Autonomous growth & governance engine)
@@ -168,15 +162,13 @@ ForgeOS/
 
 ## 💳 Payment Gateway & Revenue Routing
 
-ForgeOS connects with **Locus Checkout** for instant customer checkout and **Locus Wallets** for automated revenue routing:
+ForgeOS connects with **Instant Digital Pay** for zero-friction digital credit purchases and automated revenue routing:
 
 ```
-Customer selects service → Locus Checkout session created →
+Customer selects service → Digital credit checkout →
 Payment settled → Webhook triggered → FulfillmentAgent delivers service →
-Revenue credited to Locus Wallet → Memory & Reflection updated
+Revenue credited to ForgeOS Wallet → Memory & Reflection updated
 ```
-
-In `DEMO_MODE=true`, payments and wallet balances are automatically simulated so you can evaluate the entire autonomous operating system without live financial credentials.
 
 ---
 
@@ -185,7 +177,7 @@ In `DEMO_MODE=true`, payments and wallet balances are automatically simulated so
 - **Frontend**: React 18, Vite, Custom Cyberpunk CSS Design System (Syncopate, Syne, DM Mono Google Fonts)
 - **Backend**: Node.js, Express, File/Vercel Database Persistence
 - **AI Intelligence**: Groq Llama 3 70B (via official Groq SDK)
-- **Payment Processing**: Locus Checkout & Locus Wallet API
+- **Payment Processing**: Digital Wallet & Instant Checkout API
 - **Deliverables Engine**: Nodemailer (Ethereal test previews), Markdown exporter
 
 ---

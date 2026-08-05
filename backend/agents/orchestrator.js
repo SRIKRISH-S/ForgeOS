@@ -134,7 +134,7 @@ export async function orchestrateBusinessLaunch(prompt) {
     await recordStep(
       'FinanceAgent',
       'Financial Viability & Revenue Margin Audit',
-      `Evaluating pricing tiers: ${businessConfig.services?.map(s => `$${s.price}`).join(', ')}. Checking margin elasticity and Locus revenue routing setup.`,
+      `Evaluating pricing tiers: ${businessConfig.services?.map(s => `$${s.price}`).join(', ')}. Checking margin elasticity and digital wallet revenue routing setup.`,
       'Calculated projected unit economics and tier profitability',
       `Finance verdict: ${financeReview.verdict}. Suggested price adjustments: ${JSON.stringify(financeReview.suggestedPrices)}.`,
       'Pass pricing models to SalesAgent for demand forecasting'

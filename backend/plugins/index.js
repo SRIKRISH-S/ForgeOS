@@ -51,14 +51,14 @@ const DEFAULT_PLUGINS = [
     author: 'ForgeOS Marketing'
   },
   {
-    id: 'plugin_locus_checkout',
-    name: 'Locus Autonomous Wallet Gateway',
+    id: 'plugin_digital_checkout',
+    name: 'Autonomous Digital Wallet Gateway',
     category: 'Finance',
-    description: 'Direct integration with Locus Checkout sessions and wallet revenue routing.',
+    description: 'Instant digital checkout processing and wallet revenue routing.',
     status: 'active',
     version: '3.0.0',
     capabilities: ['create_checkout', 'verify_webhook', 'get_balance'],
-    author: 'Locus Finance'
+    author: 'ForgeOS Finance'
   }
 ];
 

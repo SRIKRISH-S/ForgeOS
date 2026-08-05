@@ -6,6 +6,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
   const [orderState, setOrderState] = useState('idle'); // idle | submitting | success | error
   const [orderError, setOrderError] = useState('');
   const [lastOrder, setLastOrder] = useState(null);
+  const [showResultModal, setShowResultModal] = useState(false);
   const [chatMsg, setChatMsg] = useState('');
   const [chatHistory, setChatHistory] = useState([
     { role: 'agent', text: `Hi! I'm your ${business?.businessName || ''} AI agent. How can I help you today?` }
@@ -21,7 +22,6 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
   }
 
   const primary = business.colorScheme?.primary || '#AAFF00';
-  const secondary = business.colorScheme?.secondary || '#FFB020';
 
   const handleOrder = async (e) => {
     e.preventDefault();
@@ -35,6 +35,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
       if (result.success) {
         setLastOrder(result.order);
         setOrderState('success');
+        setShowResultModal(true); // Open clean full-width modal for deliverable & roadmap
         setOrderForm({ customerName: '', customerEmail: '', requirements: '' });
       } else {
         setOrderError(result.error || 'Something went wrong. Please try again.');
@@ -73,14 +74,13 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
 
   return (
     <div className="page">
-      {/* Hero */}
+      {/* Hero Header */}
       <div style={{
         textAlign: 'center', padding: '48px 20px 56px',
         borderBottom: '1px solid var(--border)',
         marginBottom: 48,
         position: 'relative'
       }}>
-        {/* Business color accent */}
         <div style={{
           position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
           width: 400, height: 200,
@@ -97,7 +97,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
         }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: primary, animation: 'pulse 2s infinite' }} />
           <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: primary, letterSpacing: '0.12em' }}>
-            AUTONOMOUS · LOCUS CHECKOUT ENABLED
+            AUTONOMOUS OPERATING BUSINESS SYSTEM
           </span>
         </div>
 
@@ -124,11 +124,10 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <span className="tag">✦ {business.category}</span>
-          <span className="tag">✦ AI-Operated</span>
-          <span className="tag">✦ Payments via Locus</span>
+          <span className="tag">✦ Autonomous AI Powered</span>
+          <span className="tag">✦ Instant Digital Pay</span>
         </div>
 
-        {/* Admin link */}
         <button
           onClick={onViewDashboard}
           style={{
@@ -140,16 +139,16 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
             letterSpacing: '0.05em'
           }}
         >
-          ⚡ DASHBOARD
+          ⚡ AGENT DASHBOARD
         </button>
       </div>
 
       {/* Main content: services + order form */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32 }}>
-        {/* Services */}
+        {/* Left Column: Services list */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-            <h2 style={{ fontSize: 14, letterSpacing: '0.12em', color: 'var(--text-dim)' }}>SERVICES</h2>
+            <h2 style={{ fontSize: 14, letterSpacing: '0.12em', color: 'var(--text-dim)' }}>SERVICES CATALOG</h2>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
 
@@ -166,35 +165,56 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
           </div>
         </div>
 
-        {/* Sidebar: Order form + chat */}
+        {/* Right Column: Sidebar Order Form & AI Sales Chat */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* Order Panel */}
+          {/* Order Form Panel */}
           <div className="card" style={{ borderColor: selectedService ? `${primary}40` : 'var(--border)' }}>
             <div style={{ fontSize: 13, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginBottom: 16, letterSpacing: '0.08em' }}>
-              PLACE ORDER
+              AUTONOMOUS ORDERING
             </div>
 
             {!selectedService ? (
-              <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-dimmer)', fontSize: 13 }}>
-                ← Select a service to order
+              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-dimmer)', fontSize: 13 }}>
+                ← Select a service tier from the catalog to place an order
               </div>
             ) : orderState === 'success' ? (
-              <OrderSuccess order={lastOrder} accent={primary} business={business} onReset={() => { setOrderState('idle'); setSelectedService(null); setLastOrder(null); }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'center', padding: '16px 0' }}>
+                <div style={{ fontSize: 14, color: 'var(--lime)', fontWeight: 700 }}>
+                  ✓ Order Submitted & Paid (${lastOrder?.price})
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                  Your service deliverables and AI roadmap are ready!
+                </div>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setShowResultModal(true)}
+                  style={{ justifyContent: 'center', fontSize: 12 }}
+                >
+                  📋 View Deliverable & Roadmap ↗
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => { setOrderState('idle'); setSelectedService(null); setLastOrder(null); }}
+                  style={{ justifyContent: 'center', fontSize: 11, marginTop: 4 }}
+                >
+                  ← Order Another Service
+                </button>
+              </div>
             ) : (
               <form onSubmit={handleOrder} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{
                   background: `${primary}10`,
                   border: `1px solid ${primary}30`,
-                  borderRadius: 4, padding: '10px 12px', marginBottom: 4
+                  borderRadius: 6, padding: '10px 12px', marginBottom: 4
                 }}>
-                  <div style={{ fontSize: 12, color: primary, fontFamily: 'var(--font-mono)', marginBottom: 2 }}>Selected:</div>
+                  <div style={{ fontSize: 11, color: primary, fontFamily: 'var(--font-mono)', marginBottom: 2 }}>Selected Tier:</div>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{selectedService.name}</div>
-                  <div style={{ fontSize: 16, color: primary, marginTop: 2 }}>${selectedService.price}</div>
+                  <div style={{ fontSize: 16, color: primary, marginTop: 2, fontWeight: 700 }}>${selectedService.price} Digital Credits</div>
                 </div>
 
                 <input
                   className="input"
-                  placeholder="Your name"
+                  placeholder="Your Name"
                   value={orderForm.customerName}
                   onChange={e => setOrderForm(f => ({ ...f, customerName: e.target.value }))}
                   required
@@ -202,7 +222,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
                 />
                 <input
                   className="input"
-                  placeholder="Email for delivery"
+                  placeholder="Your Email (for deliverable delivery)"
                   type="email"
                   value={orderForm.customerEmail}
                   onChange={e => setOrderForm(f => ({ ...f, customerEmail: e.target.value }))}
@@ -211,7 +231,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
                 />
                 <textarea
                   className="input"
-                  placeholder="Describe your requirements (optional)"
+                  placeholder="Describe specific requirements (optional)"
                   value={orderForm.requirements}
                   onChange={e => setOrderForm(f => ({ ...f, requirements: e.target.value }))}
                   rows={3}
@@ -224,14 +244,13 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
                   style={{ width: '100%', justifyContent: 'center' }}
                 >
                   {orderState === 'submitting' ? (
-                    <>Connecting to Locus...</>
+                    <>Processing Instant Payment...</>
                   ) : (
                     <>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                        <line x1="1" y1="10" x2="23" y2="10"/>
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                       </svg>
-                      Pay ${selectedService.price} via Locus
+                      Instant Digital Pay (${selectedService.price})
                     </>
                   )}
                 </button>
@@ -244,12 +263,12 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
             )}
           </div>
 
-          {/* AI Chat widget */}
+          {/* AI Sales Chat widget */}
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               <div className="pulse-dot" style={{ width: 6, height: 6 }} />
               <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '0.08em' }}>
-                AI SALES AGENT
+                AI SALES AGENT CHAT
               </div>
             </div>
 
@@ -293,31 +312,18 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
               </button>
             </form>
           </div>
-
-          {/* Recent orders mini */}
-          {orders?.length > 0 && (
-            <div className="card">
-              <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginBottom: 12, letterSpacing: '0.08em' }}>
-                RECENT ORDERS ({orders.length})
-              </div>
-              {orders.slice(0, 3).map(o => (
-                <div key={o.id} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: 12
-                }}>
-                  <span style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
-                    {o.customerName.split(' ')[0]}
-                  </span>
-                  <span style={{ color: primary }}>${o.price}</span>
-                  <span className={`badge ${o.status === 'fulfilled' ? 'badge-active' : 'badge-pending'}`}>
-                    {o.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Full Center Modal for Order Success, Deliverable & Execution Roadmap */}
+      {showResultModal && lastOrder && (
+        <OrderResultModal
+          order={lastOrder}
+          business={business}
+          accent={primary}
+          onClose={() => setShowResultModal(false)}
+        />
+      )}
     </div>
   );
 }
@@ -382,265 +388,197 @@ function ServiceCard({ service, selected, onSelect, accent }) {
   );
 }
 
-function OrderSuccess({ order, accent, onReset, business }) {
+// Full Center Modal overlay for clean presentation of deliverables and execution roadmaps
+function OrderResultModal({ order, business, accent, onClose }) {
   const [roadmap, setRoadmap] = useState(null);
-  const [roadmapLoading, setRoadmapLoading] = useState(true);
-  const [roadmapError, setRoadmapError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activePhase, setActivePhase] = useState(0);
 
   useEffect(() => {
     if (!order?.id) return;
     const fetchRoadmap = async () => {
-      setRoadmapLoading(true);
+      setLoading(true);
       try {
         const res = await fetch(`/api/orders/${order.id}/roadmap`, { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            order,
-            business
-          })
+          body: JSON.stringify({ order, business })
         });
         const data = await res.json();
         if (data.success) setRoadmap(data.roadmap);
-        else setRoadmapError('Could not generate roadmap.');
-      } catch {
-        setRoadmapError('Network error generating roadmap.');
-      } finally {
-        setRoadmapLoading(false);
+      } catch {} finally {
+        setLoading(false);
       }
     };
     fetchRoadmap();
   }, [order?.id, business]);
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {/* Success header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        padding: '14px 16px',
-        background: `${accent}12`,
-        border: `1px solid ${accent}30`,
-        borderRadius: 8, marginBottom: 16
-      }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          background: `${accent}25`, border: `2px solid ${accent}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0
-        }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: accent, marginBottom: 2 }}>
-            Payment Confirmed ✦ ${order?.price}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            #{order?.id?.slice(0, 16)}...
-          </div>
-        </div>
-      </div>
-
-      {/* Roadmap section */}
-      {roadmapLoading ? (
-        <div style={{
-          padding: '28px 0', textAlign: 'center',
-          color: 'var(--text-dim)', fontSize: 12,
-          fontFamily: 'var(--font-mono)'
-        }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            border: `2px solid ${accent}`,
-            borderTopColor: 'transparent',
-            margin: '0 auto 12px',
-            animation: 'spin 0.8s linear infinite'
-          }} />
-          ArchitectAgent generating your<br/>business development plan...
-        </div>
-      ) : roadmapError ? (
-        <div style={{ padding: 12, color: 'var(--red)', fontSize: 12, textAlign: 'center' }}>
-          {roadmapError}
-        </div>
-      ) : roadmap ? (
-        <RoadmapPanel roadmap={roadmap} accent={accent} activePhase={activePhase} setActivePhase={setActivePhase} />
-      ) : null}
-
-      <button
-        className="btn btn-ghost"
-        onClick={onReset}
-        style={{ width: '100%', justifyContent: 'center', marginTop: 16, fontSize: 12 }}
-      >
-        ← Place Another Order
-      </button>
-    </div>
-  );
-}
-
-function RoadmapPanel({ roadmap, accent, activePhase, setActivePhase }) {
-  const phase = roadmap.phases?.[activePhase];
+  const phase = roadmap?.phases?.[activePhase];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Headline */}
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(7,7,14,0.92)',
+      backdropFilter: 'blur(10px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 1000, padding: 24,
+      animation: 'fadeIn 0.2s ease'
+    }} onClick={onClose}>
       <div style={{
-        fontSize: 13, fontWeight: 700, lineHeight: 1.4,
-        background: `linear-gradient(135deg, #F0F0F8 0%, ${accent} 100%)`,
-        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
-      }}>
-        {roadmap.headline}
-      </div>
-      <div style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.6 }}>
-        {roadmap.summary}
-      </div>
-
-      {/* ROI badge */}
-      {roadmap.estimatedROI && (
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '5px 10px', borderRadius: 100,
-          background: `${accent}15`, border: `1px solid ${accent}35`,
-          fontSize: 11, fontFamily: 'var(--font-mono)', color: accent,
-          alignSelf: 'flex-start'
-        }}>
-          📈 ROI: {roadmap.estimatedROI}
+        background: 'var(--bg-2)',
+        border: `1px solid ${accent}50`,
+        borderRadius: 14, padding: 32,
+        maxWidth: 820, width: '100%',
+        maxHeight: '90vh', overflowY: 'auto',
+        animation: 'fadeInUp 0.3s ease',
+        boxShadow: `0 0 60px ${accent}20`
+      }} onClick={e => e.stopPropagation()}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+          <div>
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: accent, letterSpacing: '0.12em', marginBottom: 4 }}>
+              CONFIRMED ORDER & EXECUTION ROADMAP — #{order.id?.slice(0, 8)}
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)' }}>
+              {order.serviceName}
+            </h2>
+            <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 2 }}>
+              Customer: {order.customerName} ({order.customerEmail}) &nbsp;·&nbsp; Paid: ${order.price} Digital Credits
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'var(--bg-3)', border: '1px solid var(--border)',
+            color: 'var(--text-dim)', borderRadius: 6, padding: '6px 14px',
+            cursor: 'pointer', fontSize: 12
+          }}>✕ Close</button>
         </div>
-      )}
 
-      {/* Phase tabs */}
-      {roadmap.phases?.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', letterSpacing: '0.08em' }}>
-            EXECUTION PHASES
-          </div>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {roadmap.phases.map((p, i) => (
-              <button
-                key={i}
-                onClick={() => setActivePhase(i)}
-                style={{
-                  padding: '4px 10px', borderRadius: 4, fontSize: 10,
-                  fontFamily: 'var(--font-mono)', cursor: 'pointer',
-                  border: `1px solid ${activePhase === i ? (p.color || accent) : 'var(--border)'}`,
-                  background: activePhase === i ? `${p.color || accent}18` : 'var(--bg-3)',
-                  color: activePhase === i ? (p.color || accent) : 'var(--text-dim)',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {p.icon} Phase {p.phase}
-              </button>
-            ))}
-          </div>
-
-          {phase && (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
             <div style={{
-              background: 'var(--bg-3)',
-              border: `1px solid ${phase.color || accent}30`,
-              borderRadius: 8, padding: 14,
-              animation: 'fadeInUp 0.25s ease'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: phase.color || accent }}>
-                  {phase.icon} {phase.title}
-                </div>
-                <div style={{
-                  fontSize: 10, fontFamily: 'var(--font-mono)',
-                  color: 'var(--text-dimmer)',
-                  padding: '2px 8px', borderRadius: 100,
-                  background: 'var(--bg-2)', border: '1px solid var(--border)'
-                }}>
-                  {phase.timeline}
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {phase.steps?.map((step, j) => (
-                  <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                    <div style={{
-                      width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
-                      background: `${phase.color || accent}20`,
-                      border: `1px solid ${phase.color || accent}50`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 9, color: phase.color || accent, fontWeight: 700, marginTop: 1
-                    }}>
-                      {j + 1}
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>{step}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Key Outcomes */}
-      {roadmap.keyOutcomes?.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', letterSpacing: '0.08em' }}>
-            KEY OUTCOMES
+              width: 36, height: 36, borderRadius: '50%',
+              border: `2px solid ${accent}`, borderTopColor: 'transparent',
+              margin: '0 auto 16px',
+              animation: 'spin 0.8s linear infinite'
+            }} />
+            ArchitectAgent generating full execution roadmap...
           </div>
-          {roadmap.keyOutcomes.map((outcome, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'flex-start', gap: 10,
-              padding: '8px 10px', borderRadius: 6,
-              background: 'var(--bg-3)', border: '1px solid var(--border)'
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Headline Banner */}
+            <div style={{
+              padding: 20, background: `${accent}08`,
+              border: `1px solid ${accent}25`, borderRadius: 10
             }}>
-              <span style={{ fontSize: 14, flexShrink: 0 }}>{outcome.icon}</span>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: accent, marginBottom: 2 }}>
-                  {outcome.metric}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.4 }}>
-                  {outcome.description}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Tools */}
-      {roadmap.tools?.length > 0 && (
-        <div>
-          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', letterSpacing: '0.08em', marginBottom: 6 }}>
-            TOOLS & TECHNOLOGY
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {roadmap.tools.map((tool, i) => (
-              <span key={i} style={{
-                padding: '3px 8px', borderRadius: 4,
-                background: 'var(--bg-3)', border: '1px solid var(--border)',
-                fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)'
+              <div style={{
+                fontSize: 18, fontWeight: 700, marginBottom: 8,
+                background: `linear-gradient(135deg, #F0F0F8 0%, ${accent} 100%)`,
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text', lineHeight: 1.3
               }}>
-                {tool}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Next Steps */}
-      {roadmap.nextSteps?.length > 0 && (
-        <div style={{
-          background: `${accent}08`, border: `1px solid ${accent}25`,
-          borderRadius: 8, padding: 12
-        }}>
-          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: accent, letterSpacing: '0.08em', marginBottom: 8 }}>
-            YOUR NEXT STEPS
-          </div>
-          {roadmap.nextSteps.map((step, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'flex-start', gap: 8,
-              marginBottom: i < roadmap.nextSteps.length - 1 ? 6 : 0
-            }}>
-              <span style={{ color: accent, fontSize: 11, marginTop: 1, flexShrink: 0 }}>→</span>
-              <div style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>{step}</div>
+                {roadmap?.headline || 'Your AI-Powered Business Service Activated'}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.6 }}>
+                {roadmap?.summary}
+              </div>
+              {roadmap?.estimatedROI && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  marginTop: 12, padding: '5px 12px', borderRadius: 100,
+                  background: `${accent}15`, border: `1px solid ${accent}35`,
+                  fontSize: 12, fontFamily: 'var(--font-mono)', color: accent
+                }}>
+                  📈 Estimated ROI: <strong>{roadmap.estimatedROI}</strong>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* Execution Phases */}
+            {roadmap?.phases?.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', letterSpacing: '0.1em', marginBottom: 12 }}>
+                  DELIVERY PHASES
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                  {roadmap.phases.map((p, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActivePhase(i)}
+                      style={{
+                        padding: '8px 16px', borderRadius: 6, fontSize: 12,
+                        fontFamily: 'var(--font-mono)', cursor: 'pointer',
+                        border: `1px solid ${activePhase === i ? (p.color || accent) : 'var(--border)'}`,
+                        background: activePhase === i ? `${p.color || accent}18` : 'var(--bg-3)',
+                        color: activePhase === i ? (p.color || accent) : 'var(--text-dim)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {p.icon} Phase {p.phase}: {p.title}
+                    </button>
+                  ))}
+                </div>
+
+                {phase && (
+                  <div style={{
+                    background: 'var(--bg-3)',
+                    border: `1px solid ${phase.color || accent}35`,
+                    borderRadius: 10, padding: 20
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: phase.color || accent }}>
+                        {phase.icon} {phase.title}
+                      </div>
+                      <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', padding: '3px 10px', background: 'var(--bg-2)', borderRadius: 100 }}>
+                        ⏱ {phase.timeline}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {phase.steps?.map((step, j) => (
+                        <div key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                          <span style={{
+                            width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                            background: `${phase.color || accent}20`, border: `1px solid ${phase.color || accent}50`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 10, color: phase.color || accent, fontWeight: 700
+                          }}>
+                            {j + 1}
+                          </span>
+                          <span style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }}>{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Key Outcomes */}
+            {roadmap?.keyOutcomes?.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', letterSpacing: '0.1em', marginBottom: 12 }}>
+                  KEY DELIVERABLE OUTCOMES
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  {roadmap.keyOutcomes.map((outcome, i) => (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 12,
+                      padding: '12px 14px', borderRadius: 8,
+                      background: 'var(--bg-3)', border: '1px solid var(--border)'
+                    }}>
+                      <span style={{ fontSize: 20 }}>{outcome.icon}</span>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: accent, marginBottom: 2 }}>{outcome.metric}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>{outcome.description}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

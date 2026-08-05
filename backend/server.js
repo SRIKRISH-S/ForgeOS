@@ -179,7 +179,7 @@ app.post('/api/orders', async (req, res) => {
     if (checkout.isDemoMode) {
       await addLog('FinanceAgent', `[DEMO] Checkout session created — $${service.price} payment simulated`, 'info');
     } else {
-      await addLog('FinanceAgent', `Locus Checkout created — awaiting payment for $${service.price}`, 'info');
+      await addLog('FinanceAgent', `Digital Checkout created — awaiting payment for $${service.price}`, 'info');
     }
 
     res.json({ success: true, order, checkoutUrl: checkout.checkoutUrl });
@@ -230,7 +230,7 @@ app.post('/api/orders/:id/fulfill', async (req, res) => {
       await addLog('FulfillmentAgent', `Email sent to ${order.customerEmail}. Preview: ${result.emailPreviewUrl}`, 'success');
     }
     await addLog('FulfillmentAgent', `Order fulfilled successfully — deliverable available for download`, 'success');
-    await addLog('FinanceAgent', `Revenue confirmed: $${order.price} — routing to Locus wallet`, 'success');
+    await addLog('FinanceAgent', `Revenue confirmed: $${order.price} — routing to digital wallet`, 'success');
     await addLog('ReflectionAgent', `Analyzing deliverable quality and updating MemoryAgent customer profile`, 'info');
 
     res.json({ success: true, order });
