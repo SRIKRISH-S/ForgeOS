@@ -1,18 +1,35 @@
+// ============================================================
+// ArchitectAgent — Business & Service Strategy Engine
+// ============================================================
+
 import 'dotenv/config';
 import Groq from 'groq-sdk';
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export async function architectBusiness(prompt) {
+/**
+ * Generates a complete digital services business plan.
+ * Accepts optional memory context for informed decision making.
+ *
+ * @param {string} prompt - Business idea prompt
+ * @param {object} memoryContext - Historical learnings and context from MemoryAgent
+ * @returns {object} Business design configuration with structured reasoning
+ */
+export async function architectBusiness(prompt, memoryContext = null) {
+  const contextSnippet = memoryContext?.relevantLearnings?.length > 0
+    ? `HISTORICAL LEARNINGS TO CONSIDER:\n${memoryContext.relevantLearnings.map(l => `- ${l.insight}`).join('\n')}`
+    : '';
+
   const message = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     max_tokens: 2000,
     messages: [
       {
         role: 'user',
-        content: `You are ArchitectAgent, an elite AI business strategist. Given a business idea, you design a complete, profitable digital services business.
+        content: `You are ArchitectAgent, an elite AI business strategist. Given a business idea, design a complete, profitable digital services business.
 
 Business idea: "${prompt}"
+${contextSnippet}
 
 Respond ONLY with a valid JSON object (no markdown, no explanation). Structure:
 {
@@ -56,7 +73,14 @@ Respond ONLY with a valid JSON object (no markdown, no explanation). Structure:
   ],
   "targetAudience": "Who this business serves",
   "uniqueValueProp": "Why customers choose this over alternatives",
-  "agentPersona": "The AI agent's role description (e.g., 'Senior Brand Strategist with 10 years experience')"
+  "agentPersona": "The AI agent's role description (e.g., 'Senior Brand Strategist with 10 years experience')",
+  "reasoningTrace": {
+    "goal": "Design optimal service architecture and pricing tiers",
+    "thought": "Analyzed market demand and historical memory context to optimize pricing and tier value proposition",
+    "action": "Generated brand identity, color palette, and 3 service tiers",
+    "observation": "Configured tiered monetization model ($29, $79, $149)",
+    "nextStep": "Submit to FinanceAgent and SalesAgent for review"
+  }
 }`
       }
     ]
@@ -71,6 +95,9 @@ Respond ONLY with a valid JSON object (no markdown, no explanation). Structure:
   }
 }
 
+/**
+ * Generates a strategic market insight.
+ */
 export async function generateBusinessInsight(businessConfig) {
   const message = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',

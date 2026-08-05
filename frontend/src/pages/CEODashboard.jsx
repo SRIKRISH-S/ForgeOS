@@ -1,0 +1,268 @@
+// ============================================================
+// CEODashboard.jsx — Autonomous Executive Command Center
+// ============================================================
+
+import { useState, useEffect } from 'react';
+
+export default function CEODashboard({ business }) {
+  const [ceoData, setCeoData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [triggering, setTriggering] = useState(false);
+
+  useEffect(() => {
+    fetchCEODashboard();
+  }, []);
+
+  const fetchCEODashboard = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/ceo/dashboard');
+      const data = await res.json();
+      setCeoData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTriggerCycle = async () => {
+    setTriggering(true);
+    try {
+      const res = await fetch('/api/ceo/trigger', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        await fetchCEODashboard();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTriggering(false);
+    }
+  };
+
+  if (!business) {
+    return (
+      <div className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>No active business. Launch a business to initialize CEOAgent.</div>
+      </div>
+    );
+  }
+
+  const health = ceoData?.businessHealth || { healthScore: 0, growthScore: 0, customerSatisfaction: 0, riskLevel: 'low' };
+
+  return (
+    <div className="page">
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <div>
+          <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--amber)', letterSpacing: '0.12em', marginBottom: 6 }}>
+            CEOAGENT EXECUTIVE GOVERNANCE & AUTONOMOUS GROWTH
+          </div>
+          <h1 style={{ fontSize: 24, letterSpacing: '0.06em' }}>CEO COMMAND CENTER</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-dim)', marginTop: 4 }}>
+            Continuous background business optimization, dynamic pricing, promotional campaigns, and risk management.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            className="btn btn-primary"
+            onClick={handleTriggerCycle}
+            disabled={triggering}
+            style={{ fontSize: 12, background: 'var(--amber)', color: '#07070E' }}
+          >
+            {triggering ? 'Analyzing...' : '⚡ Trigger Autonomous CEO Cycle'}
+          </button>
+        </div>
+      </div>
+
+      {/* Gauges & Health Index Row */}
+      <div className="grid-4" style={{ marginBottom: 28 }}>
+        <HealthBox label="Business Health Index" score={health.healthScore} color="var(--lime)" sub="Overall operational fitness" />
+        <HealthBox label="Growth Score" score={health.growthScore} color="var(--cyan)" sub="Revenue & acquisition velocity" />
+        <HealthBox label="Customer Satisfaction" score={health.customerSatisfaction} color="var(--amber)" sub="Post-fulfillment rating" />
+        <RiskBox level={health.riskLevel} />
+      </div>
+
+      {/* Main Grid: Decisions Log & Revenue Timeline */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24 }}>
+        {/* Left: Autonomous Decisions Log */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div>
+            <SectionHeader label="AUTONOMOUS DECISIONS LOG" />
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {loading ? (
+                <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+                  Fetching CEO decision log...
+                </div>
+              ) : (ceoData?.decisions || []).length === 0 ? (
+                <div style={{ padding: 30, textAlign: 'center', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-dimmer)' }}>
+                  No autonomous decisions logged yet. Click "Trigger Autonomous CEO Cycle" above to run an analysis.
+                </div>
+              ) : (
+                ceoData.decisions.map(d => <DecisionCard key={d.id} decision={d} />)
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Revenue Breakdown & Strategic Recommendations */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Revenue metrics */}
+          <div className="card">
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginBottom: 16, letterSpacing: '0.08em' }}>
+              REVENUE & ORDERS OVERVIEW
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <MetricRow label="Total Earned" value={`$${ceoData?.totalRevenue || 0}`} color="var(--lime)" />
+              <MetricRow label="Total Orders" value={ceoData?.totalOrders || 0} color="var(--text)" />
+              <MetricRow label="Fulfilled Orders" value={ceoData?.fulfilledOrders || 0} color="var(--cyan)" />
+              <MetricRow label="Pending Queue" value={ceoData?.pendingOrders || 0} color="var(--amber)" />
+            </div>
+          </div>
+
+          {/* Revenue Chart */}
+          <div className="card">
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginBottom: 16, letterSpacing: '0.08em' }}>
+              24H REVENUE TIMELINE
+            </div>
+            <CEORevenueChart timeline={ceoData?.revenueTimeline || []} />
+          </div>
+
+          {/* Business Governance Status */}
+          <div className="card" style={{ background: 'rgba(255,176,32,0.04)', borderColor: 'rgba(255,176,32,0.2)' }}>
+            <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--amber)', marginBottom: 8, letterSpacing: '0.08em' }}>
+              AUTONOMOUS GOVERNANCE STATUS
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.6 }}>
+              CEOAgent evaluates business state continuously every 60s in the background. Pricing optimizations, promotional campaigns, and service retirement are executed with ReflectionAgent safety validation.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HealthBox({ label, score, color, sub }) {
+  return (
+    <div className="stat-box">
+      <div className="stat-label">{label}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, margin: '6px 0' }}>
+        <span style={{ fontSize: 32, fontFamily: 'var(--font-display)', color }}>{score}</span>
+        <span style={{ fontSize: 14, color: 'var(--text-dimmer)', fontFamily: 'var(--font-mono)' }}>/100</span>
+      </div>
+      <div style={{ height: 4, background: 'var(--bg-3)', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+        <div style={{ width: `${score}%`, height: '100%', background: color, transition: 'width 0.6s ease' }} />
+      </div>
+      <div className="stat-sub">{sub}</div>
+    </div>
+  );
+}
+
+function RiskBox({ level = 'low' }) {
+  const colors = {
+    low: 'var(--lime)',
+    medium: 'var(--amber)',
+    high: 'var(--red)',
+    critical: '#FF0055'
+  };
+  const color = colors[level.toLowerCase()] || 'var(--lime)';
+
+  return (
+    <div className="stat-box">
+      <div className="stat-label">RISK RADAR</div>
+      <div style={{ fontSize: 24, fontFamily: 'var(--font-display)', color: color, textTransform: 'uppercase', margin: '6px 0' }}>
+        {level}
+      </div>
+      <div className="stat-sub">Continuous risk monitoring</div>
+    </div>
+  );
+}
+
+function DecisionCard({ decision }) {
+  const typeColors = {
+    pricing_optimization: 'var(--lime)',
+    promotion_launch: 'var(--amber)',
+    service_creation: 'var(--cyan)',
+    service_retirement: 'var(--red)',
+    growth_recommendation: 'var(--blue)',
+    risk_alert: 'var(--red)'
+  };
+  const color = typeColors[decision.type] || 'var(--amber)';
+
+  return (
+    <div style={{
+      background: 'var(--bg-2)', border: `1px solid ${color}30`,
+      borderRadius: 8, padding: 16
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <div>
+          <span style={{
+            fontSize: 10, fontFamily: 'var(--font-mono)', color, textTransform: 'uppercase',
+            padding: '2px 8px', borderRadius: 4, background: `${color}15`, border: `1px solid ${color}30`
+          }}>
+            {decision.type?.replace('_', ' ')}
+          </span>
+          <h4 style={{ fontSize: 14, marginTop: 8, color: 'var(--text)' }}>{decision.title}</h4>
+        </div>
+        <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)' }}>
+          {new Date(decision.createdAt).toLocaleTimeString()}
+        </span>
+      </div>
+
+      <p style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 10 }}>
+        {decision.description}
+      </p>
+
+      {decision.impact && (
+        <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)' }}>
+          Impact: {decision.impact}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MetricRow({ label, value, color }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{label}</span>
+      <span style={{ fontSize: 14, fontFamily: 'var(--font-mono)', color: color || 'var(--text)' }}>{value}</span>
+    </div>
+  );
+}
+
+function CEORevenueChart({ timeline }) {
+  if (!timeline || timeline.length === 0) return <div style={{ height: 60, background: 'var(--bg-3)', borderRadius: 4 }} />;
+  const max = Math.max(...timeline.map(t => t.revenue), 1);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 70 }}>
+      {timeline.map((t, i) => (
+        <div
+          key={i}
+          title={`${t.hour}:00 — $${t.revenue}`}
+          style={{
+            flex: 1,
+            height: `${(t.revenue / max) * 100}%`,
+            minHeight: t.revenue > 0 ? 4 : 2,
+            background: t.revenue > 0 ? 'linear-gradient(180deg, var(--amber) 0%, rgba(255,176,32,0.2) 100%)' : 'var(--bg-3)',
+            borderRadius: 2
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SectionHeader({ label }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', letterSpacing: '0.1em' }}>
+        {label}
+      </span>
+      <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+    </div>
+  );
+}

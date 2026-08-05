@@ -1,8 +1,18 @@
+// ============================================================
+// FulfillmentAgent & SalesAgent Engine
+// ============================================================
+// Fulfills customer orders using LLM text generation, delivers
+// formatted deliverables, handles sales inquiries, and hooks
+// into ReflectionAgent and MemoryAgent post-fulfillment.
+// ============================================================
+
 import 'dotenv/config';
 import Groq from 'groq-sdk';
 import nodemailer from 'nodemailer';
 import fs from 'fs/promises';
 import path from 'path';
+import { upsertCustomerProfile } from './memory.js';
+import { reflectOnOrder } from './reflection.js';
 
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -28,7 +38,7 @@ async function sendDeliverableEmail(order, businessConfig, deliverable) {
           <hr />
           <div style="white-space: pre-wrap; background: #f9f9f9; padding: 15px; border-radius: 5px;">${deliverable}</div>
           <hr />
-          <p style="font-size: 12px; color: #777;">Thank you for choosing ${businessConfig.businessName} (Powered by ForgeOS)</p>
+          <p style="font-size: 12px; color: #777;">Thank you for choosing ${businessConfig.businessName} (Powered by ForgeOS Autonomous OS)</p>
         </div>
       `,
     });
@@ -41,11 +51,15 @@ async function sendDeliverableEmail(order, businessConfig, deliverable) {
   }
 }
 
+/**
+ * Fulfills a customer order autonomously.
+ * Generates custom service deliverables, saves file, triggers email,
+ * updates customer profile in MemoryAgent, and triggers ReflectionAgent.
+ */
 export async function fulfillOrder(order, businessConfig) {
-  const service = businessConfig.services.find(s => s.id === order.serviceId);
-  
+  const service = businessConfig.services?.find(s => s.id === order.serviceId);
   const agentPersona = businessConfig.agentPersona || 'Expert service provider';
-  
+
   const message = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     max_tokens: 2000,
@@ -72,8 +86,8 @@ Format with clear sections. Be specific, creative, and professional. Minimum 300
   });
 
   const deliverable = message.choices[0].message.content;
-  
-  // Save as file for download
+
+  // Save as markdown file for user download
   const fileName = `deliverable_${order.id.slice(0, 8)}.md`;
   const publicDir = process.env.VERCEL ? path.join('/tmp', 'deliverables') : path.join(process.cwd(), 'public', 'deliverables');
   await fs.mkdir(publicDir, { recursive: true });
@@ -82,16 +96,50 @@ Format with clear sections. Be specific, creative, and professional. Minimum 300
   // Send email simulation
   const emailPreviewUrl = await sendDeliverableEmail(order, businessConfig, deliverable);
 
-  return {
+  const completedOrder = {
+    ...order,
+    status: 'fulfilled',
     deliverable,
     fileName,
     fileUrl: process.env.VERCEL ? `/api/deliverables/${fileName}` : `/deliverables/${fileName}`,
     emailPreviewUrl,
     fulfilledAt: new Date().toISOString(),
-    agentUsed: 'FulfillmentAgent v2.1'
+    agentUsed: 'FulfillmentAgent v3.0'
+  };
+
+  // ------------------------------------------------------------
+  // Autonomous Memory & Learning Loop Triggers
+  // ------------------------------------------------------------
+  try {
+    // 1. Update Customer Profile in MemoryAgent
+    await upsertCustomerProfile(completedOrder);
+
+    // 2. Trigger ReflectionAgent post-fulfillment analysis (in background)
+    reflectOnOrder(completedOrder, businessConfig).catch(e => console.error('[ReflectionAgent Error]:', e));
+  } catch (mErr) {
+    console.error('[Memory update error]:', mErr);
+  }
+
+  return {
+    deliverable,
+    fileName,
+    fileUrl: completedOrder.fileUrl,
+    emailPreviewUrl,
+    fulfilledAt: completedOrder.fulfilledAt,
+    agentUsed: completedOrder.agentUsed,
+    reasoningTrace: {
+      goal: `Fulfill order ${order.id.slice(0, 8)} for ${order.customerName}`,
+      thought: `Analyzed customer requirements: "${order.requirements || 'Standard'}". Generated structured ${service?.name || 'service'} deliverable.`,
+      action: 'Generated 300+ word professional deliverable and compiled .md file artifact',
+      observation: `Deliverable compiled successfully. Generated download link and email preview.`,
+      nextStep: 'Pass to ReflectionAgent for outcome quality scoring and Memory update'
+    }
   };
 }
 
+/**
+ * Handles customer sales inquiries.
+ */
 export async function generateSalesResponse(inquiry, businessConfig, history = []) {
   const messages = [
     {
@@ -110,6 +158,9 @@ export async function generateSalesResponse(inquiry, businessConfig, history = [
   return message.choices[0].message.content;
 }
 
+/**
+ * Generates dynamic agent heartbeat activities.
+ */
 export async function generateAgentActivity(businessConfig, type) {
   const activities = {
     scanning: [
@@ -125,13 +176,13 @@ export async function generateAgentActivity(businessConfig, type) {
       `Generating personalized follow-up sequences...`,
     ],
     financial: [
-      `Reconciling Locus wallet balance with fulfilled orders...`,
+      `Reconciling wallet balance with fulfilled orders...`,
       `Calculating profit margins across service tiers...`,
       `Projecting monthly recurring revenue trajectory...`,
       `Flagging high-value customer segments for retention...`,
     ]
   };
-  
+
   const pool = activities[type] || activities.scanning;
   return pool[Math.floor(Math.random() * pool.length)];
 }

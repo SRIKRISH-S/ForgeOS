@@ -9,11 +9,14 @@ const EXAMPLES = [
   "Email copywriting agency for D2C brands"
 ];
 
-const AGENT_PREVIEW = [
-  { agent: 'ArchitectAgent', msg: 'Analyzing market opportunity and designing service tiers...' },
-  { agent: 'SalesAgent', msg: 'Configuring storefront and pricing strategy...' },
-  { agent: 'FulfillmentAgent', msg: 'Initializing AI delivery pipeline...' },
-  { agent: 'FinanceAgent', msg: 'Connecting Locus wallet for autonomous revenue routing...' },
+const COLLABORATIVE_AGENT_STEPS = [
+  { agent: 'OrchestratorAgent', msg: 'Decomposing prompt & retrieving MemoryAgent learnings...' },
+  { agent: 'ArchitectAgent', msg: 'Formulating initial brand identity and service tier hierarchy...' },
+  { agent: 'FinanceAgent', msg: 'Auditing pricing elasticity, margins, and Locus wallet connectivity...' },
+  { agent: 'SalesAgent', msg: 'Simulating customer demand & predicting storefront conversion...' },
+  { agent: 'ArchitectAgent', msg: 'Applying inter-agent adjustments to service descriptions...' },
+  { agent: 'ReflectionAgent', msg: 'Executing quality audit & vulnerability validation...' },
+  { agent: 'CEOAgent', msg: 'Granting executive launch approval & deploying storefront...' }
 ];
 
 export default function Launch({ onLaunch, loading }) {
@@ -42,10 +45,10 @@ export default function Launch({ onLaunch, loading }) {
     return () => clearInterval(typer);
   }, [exampleIdx, loading]);
 
-  // Animate agent steps during loading
+  // Animate multi-agent collaborative steps during loading
   useEffect(() => {
     if (!loading) { setAgentStep(0); return; }
-    const interval = setInterval(() => setAgentStep(n => n + 1), 1400);
+    const interval = setInterval(() => setAgentStep(n => n + 1), 1100);
     return () => clearInterval(interval);
   }, [loading]);
 
@@ -79,7 +82,7 @@ export default function Launch({ onLaunch, loading }) {
           }}>
             <div className="pulse-dot" style={{ width: 6, height: 6 }} />
             <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              Powered by LocusFounder × Claude AI
+              Autonomous Business Operating System
             </span>
           </div>
 
@@ -93,11 +96,11 @@ export default function Launch({ onLaunch, loading }) {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>
-            ONE PROMPT.<br />ONE BUSINESS.
+            ONE PROMPT.<br />AUTONOMOUS BUSINESS.
           </h1>
 
           <p style={{ fontSize: 16, color: 'var(--text-dim)', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-            Describe any digital service business. ForgeOS deploys four autonomous AI agents that run it — no human required.
+            Describe any digital service business. ForgeOS deploys 8 collaborating AI agents that plan, reason, execute, reflect, and grow it autonomously.
           </p>
         </div>
 
@@ -143,14 +146,14 @@ export default function Launch({ onLaunch, loading }) {
                 {loading ? (
                   <>
                     <LoadingSpinner size={14} />
-                    Forging...
+                    Orchestrating Agents...
                   </>
                 ) : (
                   <>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <polygon points="5 3 19 12 5 21 5 3"/>
                     </svg>
-                    Launch Business
+                    Launch Autonomous Business
                   </>
                 )}
               </button>
@@ -158,35 +161,35 @@ export default function Launch({ onLaunch, loading }) {
           </div>
         </form>
 
-        {/* Agent loading animation */}
+        {/* Agent loading & negotiation trace animation */}
         {loading && (
           <div style={{ marginTop: 32, animation: 'fadeInUp 0.4s ease' }}>
             <div className="card">
-              <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', marginBottom: 16, letterSpacing: '0.1em' }}>
-                AGENT INITIALIZATION
+              <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', marginBottom: 16, letterSpacing: '0.1em' }}>
+                COLLABORATIVE AGENT NEGOTIATION IN PROGRESS
               </div>
-              {AGENT_PREVIEW.map((item, i) => (
+              {COLLABORATIVE_AGENT_STEPS.map((item, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 0',
-                  borderBottom: i < AGENT_PREVIEW.length - 1 ? '1px solid var(--border)' : 'none',
-                  opacity: agentStep > i ? 1 : 0.25,
+                  borderBottom: i < COLLABORATIVE_AGENT_STEPS.length - 1 ? '1px solid var(--border)' : 'none',
+                  opacity: agentStep >= i ? 1 : 0.25,
                   transition: 'opacity 0.4s'
                 }}>
                   <div style={{
                     width: 20, height: 20, borderRadius: '50%',
-                    background: agentStep > i ? 'var(--lime-dim)' : 'var(--bg-3)',
-                    border: `1px solid ${agentStep > i ? 'var(--lime-glow)' : 'var(--border)'}`,
+                    background: agentStep >= i ? 'var(--lime-dim)' : 'var(--bg-3)',
+                    border: `1px solid ${agentStep >= i ? 'var(--lime-glow)' : 'var(--border)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0, marginTop: 2, transition: 'all 0.4s'
                   }}>
-                    {agentStep > i && (
+                    {agentStep >= i && (
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" strokeWidth="3">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
                     )}
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: agentStep > i ? 'var(--lime)' : 'var(--text-dim)', marginBottom: 2 }}>
+                    <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: agentStep >= i ? 'var(--lime)' : 'var(--text-dim)', marginBottom: 2 }}>
                       {item.agent}
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--text-dim)' }}>{item.msg}</div>
@@ -201,14 +204,14 @@ export default function Launch({ onLaunch, loading }) {
         {!loading && (
           <div style={{ marginTop: 48 }}>
             <div style={{ textAlign: 'center', fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', marginBottom: 24, letterSpacing: '0.1em' }}>
-              HOW IT WORKS
+              COLLABORATIVE AGENT ARCHITECTURE
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--border)' }}>
               {[
-                { icon: '⚡', label: 'ArchitectAgent', desc: 'Designs your business, services & pricing in seconds' },
-                { icon: '🛍', label: 'SalesAgent', desc: 'Runs your live storefront and handles customer orders' },
-                { icon: '🤖', label: 'FulfillmentAgent', desc: 'Delivers every service with Claude AI — zero human touch' },
-                { icon: '💰', label: 'FinanceAgent', desc: 'Routes all revenue through Locus wallet automatically' },
+                { icon: '🧠', label: 'Orchestrator', desc: 'Coordinates 8 agents, plans tasks & handles self-healing retries' },
+                { icon: '💾', label: 'MemoryAgent', desc: 'Stores customer history & learnings retrieved before decisions' },
+                { icon: '🔍', label: 'ReflectionAgent', desc: 'Audits execution outcomes & continuously improves quality' },
+                { icon: '👑', label: 'CEOAgent', desc: 'Runs continuous background autonomy, pricing & growth' },
               ].map((item, i) => (
                 <div key={i} style={{
                   background: 'var(--bg-2)', padding: '20px 16px', textAlign: 'center'
@@ -229,7 +232,6 @@ export default function Launch({ onLaunch, loading }) {
 function LoadingSpinner({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <circle cx="12" cy="12" r="10" strokeOpacity="0.3" />
       <path d="M12 2a10 10 0 0 1 10 10" />
     </svg>

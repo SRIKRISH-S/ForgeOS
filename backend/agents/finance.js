@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import fetch from 'node-fetch';
+import { readDb } from '../database.js';
 
 const LOCUS_API_BASE = 'https://api.locusfinance.io/v1';
 const DEMO_MODE = process.env.DEMO_MODE === 'true' || 
@@ -8,8 +9,7 @@ const DEMO_MODE = process.env.DEMO_MODE === 'true' ||
                   process.env.LOCUS_API_KEY === '';
 
 // ============================================================
-// LOCUS CHECKOUT INTEGRATION
-// Docs: https://locusfinance.io/developers/checkout
+// LOCUS CHECKOUT INTEGRATION & FINANCE AGENT
 // ============================================================
 
 export async function createLocusCheckout(order, businessConfig) {
@@ -61,12 +61,20 @@ export async function createLocusCheckout(order, businessConfig) {
 
 export async function getWalletBalance() {
   if (DEMO_MODE) {
-    // Simulated wallet for demo
+    const db = await readDb().catch(() => ({ orders: [] }));
+    const orders = db.orders || [];
+    const fulfilledRevenue = orders
+      .filter(o => o.status === 'fulfilled' || o.status === 'paid')
+      .reduce((sum, o) => sum + (o.price || 0), 0);
+
+    const baseBalance = 500.00;
+    const totalBalance = baseBalance + fulfilledRevenue;
+
     return {
-      balance: 847.50,
+      balance: totalBalance,
       currency: 'USD',
-      totalEarned: 1243.00,
-      pendingPayouts: 395.50,
+      totalEarned: totalBalance + 395.50,
+      pendingPayouts: orders.filter(o => o.status === 'pending').reduce((s, o) => s + (o.price || 0), 0),
       isDemoMode: true
     };
   }
@@ -85,10 +93,6 @@ export async function getWalletBalance() {
 }
 
 export async function processWebhook(payload, signature) {
-  // Verify webhook signature from Locus
-  // Implementation depends on Locus webhook verification method
-  // See: https://locusfinance.io/developers/webhooks
-  
   const event = payload;
   
   switch (event.type) {
@@ -117,7 +121,7 @@ export function generateRevenueMetrics(orders) {
     completedOrders: completed.length,
     pendingOrders: orders.filter(o => o.status === 'pending').length,
     avgOrderValue: avgOrderValue.toFixed(2),
-    conversionRate: '3.7%',
+    conversionRate: orders.length > 0 ? `${Math.round((completed.length / orders.length) * 100)}%` : '0%',
     hourlyData
   };
 }

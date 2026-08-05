@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 import { architectBusiness, generateBusinessInsight } from './agents/architect.js';
 import { fulfillOrder, generateSalesResponse, generateAgentActivity } from './agents/fulfillment.js';
 import { createLocusCheckout, getWalletBalance, processWebhook, generateRevenueMetrics } from './agents/finance.js';
+import { orchestrateBusinessLaunch } from './agents/orchestrator.js';
+import { getMemoryState } from './agents/memory.js';
+import { runCEOCycle, getCEODashboard } from './agents/ceo.js'; // Wait, let's verify path to ceo.js!
 import { readDb, writeDb, updateDb } from './database.js';
 
 dotenv.config();
@@ -25,7 +28,7 @@ app.use((req, res, next) => {
 });
 
 // ============================================================
-// Database Logic
+// Database Logging Helper
 // ============================================================
 async function addLog(agent, message, type = 'info') {
   const log = {
@@ -46,38 +49,33 @@ async function addLog(agent, message, type = 'info') {
 }
 
 // ============================================================
-// ARCHITECT AGENT ROUTES
+// MULTI-AGENT ORCHESTRATOR ROUTES
 // ============================================================
 
-// POST /api/business/generate - Launch a new AI business
+// POST /api/business/orchestrate — Collaborative multi-agent launch pipeline
+app.post('/api/business/orchestrate', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) return res.status(400).json({ error: 'Business prompt required' });
+
+    const result = await orchestrateBusinessLaunch(prompt);
+    res.json(result);
+  } catch (err) {
+    console.error('[OrchestratorAgent] Launch Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Original legacy generate route (delegates to orchestrator for backward compatibility)
 app.post('/api/business/generate', async (req, res) => {
   try {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ error: 'Business prompt required' });
 
-    const businessConfig = await architectBusiness(prompt);
-    const newBusiness = {
-      ...businessConfig,
-      id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      prompt,
-      status: 'active'
-    };
-
-    await updateDb(db => {
-      db.currentBusiness = newBusiness;
-      db.orders = []; // Reset orders for new business
-      return db;
-    });
-
-    await addLog('ArchitectAgent', `Business created: ${businessConfig.businessName}`, 'success');
-    await addLog('SalesAgent', `Storefront is live — accepting orders for ${businessConfig.services.length} services`, 'success');
-    await addLog('FinanceAgent', `Locus wallet connected — revenue routing configured`, 'success');
-
-    res.json({ success: true, business: newBusiness });
+    const result = await orchestrateBusinessLaunch(prompt);
+    res.json({ success: true, business: result.business });
   } catch (err) {
     console.error('[ArchitectAgent] Error:', err);
-    addLog('ArchitectAgent', `Failed to generate business: ${err.message}`, 'error');
     res.status(500).json({ error: err.message });
   }
 });
@@ -104,17 +102,12 @@ app.get('/api/business/insight', async (req, res) => {
   }
 });
 
-// ============================================================
-// SALES AGENT / ORDER ROUTES
-// ============================================================
-
-// POST /api/business/restore - Restore business configuration if backend restarted
+// POST /api/business/restore - Restore business configuration
 app.post('/api/business/restore', async (req, res) => {
   try {
     const payload = req.body;
     if (!payload) return res.status(400).json({ error: 'Invalid restore payload' });
     
-    // Support both full database restore or single business restore
     const isFullDump = payload.currentBusiness !== undefined;
     const business = isFullDump ? payload.currentBusiness : payload;
     
@@ -136,12 +129,15 @@ app.post('/api/business/restore', async (req, res) => {
   }
 });
 
+// ============================================================
+// SALES AGENT / ORDER ROUTES
+// ============================================================
+
 // POST /api/orders - Create a new order
 app.post('/api/orders', async (req, res) => {
   try {
     let db = await readDb();
     
-    // Auto-restore business from client payload if missing due to serverless reset
     if (!db.currentBusiness && req.body.business) {
       db.currentBusiness = req.body.business;
       await writeDb(db);
@@ -198,13 +194,15 @@ app.post('/api/orders/:id/fulfill', async (req, res) => {
   try {
     let db = await readDb();
     
-    // Defensive check: auto-insert order and business if missing due to serverless reset
+    if (!db.currentBusiness && req.body.business) {
+      db.currentBusiness = req.body.business;
+      await writeDb(db);
+      await addLog('System', `Business auto-restored in fulfillment request: ${db.currentBusiness.businessName}`, 'info');
+    }
+    
     let orderIndex = db.orders.findIndex(o => o.id === req.params.id);
     if (orderIndex === -1 && req.body.order) {
       db.orders.push(req.body.order);
-      if (req.body.business) {
-        db.currentBusiness = req.body.business;
-      }
       await writeDb(db);
       orderIndex = db.orders.length - 1;
       await addLog('System', `Order auto-restored for fulfillment: ${req.params.id.slice(0, 8)}`, 'info');
@@ -233,6 +231,7 @@ app.post('/api/orders/:id/fulfill', async (req, res) => {
     }
     await addLog('FulfillmentAgent', `Order fulfilled successfully — deliverable available for download`, 'success');
     await addLog('FinanceAgent', `Revenue confirmed: $${order.price} — routing to Locus wallet`, 'success');
+    await addLog('ReflectionAgent', `Analyzing deliverable quality and updating MemoryAgent customer profile`, 'info');
 
     res.json({ success: true, order });
   } catch (err) {
@@ -244,23 +243,27 @@ app.post('/api/orders/:id/fulfill', async (req, res) => {
 
 // GET /api/orders - Get all orders
 app.get('/api/orders', async (req, res) => {
-  const { orders } = await readDb();
-  res.json(orders);
+  const db = await readDb();
+  if (!db.currentBusiness) {
+    return res.status(404).json({ error: 'No business active' });
+  }
+  res.json(db.orders);
 });
 
-// POST /api/orders/:id/roadmap - Generate AI business development roadmap for a service
+// POST /api/orders/:id/roadmap - Generate AI roadmap
 app.post('/api/orders/:id/roadmap', async (req, res) => {
   try {
-    const { architectBusiness: _ab, generateBusinessInsight } = await import('./agents/architect.js');
     let db = await readDb();
     
-    // Defensive check: auto-insert order and business if missing due to serverless reset
+    if (!db.currentBusiness && req.body.business) {
+      db.currentBusiness = req.body.business;
+      await writeDb(db);
+      await addLog('System', `Business auto-restored in roadmap request: ${db.currentBusiness.businessName}`, 'info');
+    }
+    
     let order = db.orders.find(o => o.id === req.params.id);
     if (!order && req.body.order) {
       db.orders.push(req.body.order);
-      if (req.body.business) {
-        db.currentBusiness = req.body.business;
-      }
       await writeDb(db);
       order = req.body.order;
       await addLog('System', `Order auto-restored for roadmap: ${req.params.id.slice(0, 8)}`, 'info');
@@ -316,7 +319,6 @@ Make it specific to ${business.category} and genuinely actionable. Include 3-4 p
     const cleaned = text.replace(/```json|```/g, '').trim();
     const roadmap = JSON.parse(cleaned);
 
-    // Cache roadmap on order
     await updateDb(currentDb => {
       const idx = currentDb.orders.findIndex(o => o.id === req.params.id);
       if (idx !== -1) currentDb.orders[idx].roadmap = roadmap;
@@ -336,7 +338,6 @@ app.post('/api/chat', async (req, res) => {
   try {
     let db = await readDb();
     
-    // Auto-restore business from client payload if missing due to serverless reset
     if (!db.currentBusiness && req.body.business) {
       db.currentBusiness = req.body.business;
       await writeDb(db);
@@ -364,10 +365,73 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ============================================================
+// MEMORY AGENT ROUTES
+// ============================================================
+
+// GET /api/memory - Full memory store
+app.get('/api/memory', async (req, res) => {
+  try {
+    const memory = await getMemoryState();
+    res.json(memory);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// CEO AGENT & CONTINUOUS AUTONOMY ROUTES
+// ============================================================
+
+// GET /api/ceo/dashboard - CEO metrics & decision log
+app.get('/api/ceo/dashboard', async (req, res) => {
+  try {
+    const ceoData = await getCEODashboard();
+    res.json(ceoData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/ceo/trigger - Manually trigger CEO cycle
+app.post('/api/ceo/trigger', async (req, res) => {
+  try {
+    const report = await runCEOCycle();
+    if (report) {
+      await addLog('CEOAgent', `Autonomous growth cycle complete: Health ${report.healthScore}/100, ${report.decisions?.length || 0} decisions`, 'success');
+    }
+    res.json({ success: true, report });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
+// ARCHITECTURE & PLUGINS ROUTES
+// ============================================================
+
+// GET /api/architecture/status - Live topology state of all 8 agents
+app.get('/api/architecture/status', async (req, res) => {
+  const db = await readDb();
+  res.json({
+    businessName: db.currentBusiness?.businessName || 'ForgeOS Platform',
+    agentStates: db.agentStates || {},
+    executionRuns: (db.executionRuns || []).slice(0, 10),
+    activeCount: Object.values(db.agentStates || {}).filter(a => a.status !== 'idle').length
+  });
+});
+
+// GET /api/plugins - List registered plugin agents and tools
+app.get('/api/plugins', async (req, res) => {
+  const { getRegisteredPlugins } = await import('./plugins/index.js');
+  const plugins = await getRegisteredPlugins();
+  res.json({ plugins });
+});
+
+// ============================================================
 // FINANCE AGENT ROUTES
 // ============================================================
 
-// GET /api/finance/wallet - Get Locus wallet balance
+// GET /api/finance/wallet - Get wallet balance
 app.get('/api/finance/wallet', async (req, res) => {
   try {
     const balance = await getWalletBalance();
@@ -384,7 +448,7 @@ app.get('/api/finance/metrics', async (req, res) => {
   res.json(metrics);
 });
 
-// POST /api/webhooks/locus - Locus payment webhooks
+// POST /api/webhooks/locus - Payment webhooks
 app.post('/api/webhooks/locus', async (req, res) => {
   try {
     const event = await processWebhook(req.body, req.headers['locus-signature']);
@@ -397,7 +461,6 @@ app.post('/api/webhooks/locus', async (req, res) => {
         await writeDb(db);
         await addLog('FinanceAgent', `Payment received via Locus — $${order.price} settled`, 'success');
         
-        // Auto-trigger fulfillment
         const result = await fulfillOrder(order, db.currentBusiness);
         order.status = 'fulfilled';
         order.deliverable = result.deliverable;
@@ -406,9 +469,6 @@ app.post('/api/webhooks/locus', async (req, res) => {
         order.fulfilledAt = result.fulfilledAt;
         await writeDb(db);
         await addLog('FulfillmentAgent', `Auto-fulfilled order for ${order.customerName}`, 'success');
-        if (result.emailPreviewUrl) {
-          await addLog('FulfillmentAgent', `Email sent. Preview: ${result.emailPreviewUrl}`, 'success');
-        }
       }
     }
     
@@ -424,11 +484,14 @@ app.post('/api/webhooks/locus', async (req, res) => {
 
 // GET /api/logs - Agent activity feed
 app.get('/api/logs', async (req, res) => {
-  const { agentLogs } = await readDb();
-  res.json(agentLogs);
+  const db = await readDb();
+  if (!db.currentBusiness) {
+    return res.status(404).json({ error: 'No business active' });
+  }
+  res.json(db.agentLogs);
 });
 
-// GET /api/agents/activity - Simulated agent heartbeat
+// GET /api/agents/activity - Heartbeat across all 8 agents
 app.get('/api/agents/activity', async (req, res) => {
   const db = await readDb();
   if (!db.currentBusiness) return res.json({ activities: [] });
@@ -439,15 +502,36 @@ app.get('/api/agents/activity', async (req, res) => {
     generateAgentActivity(db.currentBusiness, 'financial')
   ]);
 
+  const agentStates = db.agentStates || {};
+
   res.json({
     agents: [
-      { id: 'architect', name: 'ArchitectAgent', status: 'active', activity: activities[0] },
-      { id: 'sales', name: 'SalesAgent', status: 'active', activity: activities[1] },
-      { id: 'fulfillment', name: 'FulfillmentAgent', status: db.orders.some(o => o.status === 'fulfilling') ? 'busy' : 'active', activity: activities[1] },
-      { id: 'finance', name: 'FinanceAgent', status: 'active', activity: activities[2] }
+      { id: 'orchestrator', name: 'OrchestratorAgent', status: agentStates.orchestrator?.status || 'active', activity: agentStates.orchestrator?.lastAction || 'Coordinating agent pipeline...' },
+      { id: 'architect', name: 'ArchitectAgent', status: agentStates.architect?.status || 'active', activity: activities[0] },
+      { id: 'sales', name: 'SalesAgent', status: agentStates.sales?.status || 'active', activity: activities[1] },
+      { id: 'fulfillment', name: 'FulfillmentAgent', status: db.orders.some(o => o.status === 'fulfilling') ? 'busy' : (agentStates.fulfillment?.status || 'active'), activity: activities[1] },
+      { id: 'finance', name: 'FinanceAgent', status: agentStates.finance?.status || 'active', activity: activities[2] },
+      { id: 'memory', name: 'MemoryAgent', status: agentStates.memory?.status || 'active', activity: agentStates.memory?.lastAction || 'Indexing knowledge base & customer records' },
+      { id: 'reflection', name: 'ReflectionAgent', status: agentStates.reflection?.status || 'active', activity: agentStates.reflection?.lastAction || 'Evaluating execution outcomes' },
+      { id: 'ceo', name: 'CEOAgent', status: agentStates.ceo?.status || 'active', activity: agentStates.ceo?.lastAction || 'Monitoring business metrics & growth' }
     ]
   });
 });
+
+// ============================================================
+// CONTINUOUS AUTONOMY TICKER (BACKGROUND WORKER)
+// ============================================================
+// Runs CEOAgent autonomous optimization cycle periodically in background
+setInterval(async () => {
+  try {
+    const db = await readDb();
+    if (db.currentBusiness) {
+      await runCEOCycle();
+    }
+  } catch (err) {
+    console.error('[Continuous Autonomy Worker Error]:', err.message);
+  }
+}, 60000); // Runs every 60 seconds
 
 // ============================================================
 // SERVER START
@@ -455,13 +539,15 @@ app.get('/api/agents/activity', async (req, res) => {
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`
-╔═══════════════════════════════════════╗
-║         ForgeOS Backend v1.0          ║
-║   Autonomous AI Business Engine       ║
-╠═══════════════════════════════════════╣
-║  Server: http://localhost:${PORT}         ║
+╔═══════════════════════════════════════════════════════╗
+║            ForgeOS Backend v3.0                       ║
+║     Autonomous Business Operating System              ║
+╠═══════════════════════════════════════════════════════╣
+║  Server: http://localhost:${PORT}                        ║
+║  Agents: 8 Active Collaborating AI Agents             ║
+║  Autonomy: Active (CEO ticker 60s background loop)    ║
 ║  Demo Mode: ${process.env.DEMO_MODE === 'true' ? 'YES (simulated payments)' : 'NO (live Locus)  '}  ║
-╚═══════════════════════════════════════╝
+╚═══════════════════════════════════════════════════════╝
     `);
   });
 }

@@ -1,42 +1,84 @@
-# ForgeOS — Autonomous AI Business Engine
-### Built for Locus' Paygentic Hackathon — LocusFounder Track
+# ForgeOS — Autonomous Business Operating System
 
-> **One prompt. Four AI agents. A fully autonomous digital business.**
-
-ForgeOS lets you launch any digital services business by typing a single sentence. Four specialized AI agents then run the entire operation — designing services, handling customers, fulfilling orders with Claude AI, and routing revenue through Locus — completely autonomously.
+> **An Autonomous Business Operating System powered by collaborating AI agents that plan, reason, execute, learn, reflect, optimize and continuously grow digital businesses with minimal human intervention.**
 
 ---
 
-## 🎯 What Makes ForgeOS Win-Worthy
+## ⚡ Core Platform Capabilities
 
-The judging criterion is: *"make you forget there was no person running the business."*
+ForgeOS turns any business prompt into an autonomous, self-sustaining digital enterprise. Rather than relying on rigid linear scripts, ForgeOS orchestrates **8 specialized AI agents** that operate synchronously and asynchronously through a shared memory store and continuous feedback loop.
 
-ForgeOS achieves this by deploying four Claude-powered agents that never sleep:
+### 🧠 Multi-Agent Collaborative Architecture
 
-| Agent | Role |
-|-------|------|
-| **ArchitectAgent** | Designs your business, services, and pricing from a single prompt |
-| **SalesAgent** | Handles customer inquiries and storefront operations |
-| **FulfillmentAgent** | Delivers every service using Claude AI — zero human touch |
-| **FinanceAgent** | Routes all revenue through Locus Checkout and Locus wallets |
+| Agent | Core Function | Primary Capabilities |
+|-------|---------------|----------------------|
+| **OrchestratorAgent** | Central Brain & Coordinator | Prompt decomposition, multi-agent execution planning, self-healing error retries, task assignment |
+| **ArchitectAgent** | Business & Service Designer | Brand identity generation, tagline crafting, service tier packaging, pricing architecture |
+| **SalesAgent** | Storefront & Demand Specialist | Customer inquiry handling, storefront conversion optimization, sales demand forecasting |
+| **FinanceAgent** | Locus Wallet & Revenue Manager | Locus Checkout integration, margin elasticity audit, automated revenue routing |
+| **FulfillmentAgent** | AI Service Delivery Pipeline | Automated deliverable artifact generation, file export (.md), Nodemailer transaction simulation |
+| **MemoryAgent** | Long-Term Knowledge Store | Customer profile tracking, historical decision index, semantic memory retrieval before every turn |
+| **ReflectionAgent** | Quality Audit & Learning Loop | Post-fulfillment quality scoring (0-100), mistake detection, actionable learning extraction |
+| **CEOAgent** | Autonomous Growth & Governance | Continuous background analysis, dynamic pricing tweaks, promotional campaign launches, risk radar |
 
 ---
 
-## 🚀 Quick Start
+## 🔄 Multi-Agent Collaborative Execution Flow
+
+ForgeOS replaces simple step-by-step automation with collaborative multi-agent negotiation:
+
+```
+User Prompt
+    ↓
+[OrchestratorAgent] — Retrieves historical learnings from MemoryAgent & decomposes goal
+    ↓
+[ArchitectAgent] — Formulates brand identity & initial service tier catalog
+    ↓
+[FinanceAgent] — Reviews profit margins, pricing elasticity & wallet balance
+    ↓
+[SalesAgent] — Simulates buyer demand & forecasts storefront conversion rate
+    ↓
+[ArchitectAgent] — Synthesizes feedback into optimized pricing & popular tiers
+    ↓
+[ReflectionAgent] — Audits design quality (0-100) & flags potential operational risks
+    ↓
+[CEOAgent] — Grants executive launch authorization & deploys live storefront
+```
+
+Every agent execution produces a structured reasoning step:
+- **Goal**: Specific objective assigned to the agent.
+- **Thought**: Strategic rationale and evaluation of memory context.
+- **Action**: Tool call, calculation, or API operation executed.
+- **Observation**: Empirical output or data returned.
+- **Next Step**: Downstream agent handoff or state update.
+
+---
+
+## 🛠 Features & System Highlights
+
+- 💾 **Long-Term Memory Store**: `MemoryAgent` maintains persistent customer profiles, past order performance, decision outcomes, and learned insights. Every agent queries memory before making strategic decisions.
+- 🔍 **Reflection Loop**: `ReflectionAgent` runs post-fulfillment to score deliverable quality, detect vulnerabilities, and extract learnings that feed directly back into long-term memory.
+- 👑 **Continuous Background Autonomy**: `CEOAgent` runs continuous background analysis cycles every 60 seconds—optimizing prices, launching promotional campaigns, assessing risk levels, and generating strategic reports even when no users are active.
+- 🛡️ **Self-Healing Execution**: Automatic retry mechanism with prompt backoff, strategy adjustment, and cross-agent assistance whenever an agent encounters an error.
+- 🔌 **Plugin & Tool Framework**: Extensible architecture supporting external browser agents (Puppeteer/Playwright), email delivery gateways, CRM sync (HubSpot/Salesforce), and social media auto-publishers.
+
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
 - Node.js 18+
-- A Groq API key ([get one here](https://console.groq.com/keys))
-- A Locus account ([sign up here](https://locusfinance.io)) — *or run in DEMO_MODE first*
+- Groq API Key ([Get one here](https://console.groq.com/keys))
+- Locus Account / API Key ([locusfinance.io](https://locusfinance.io)) — *or run in `DEMO_MODE`*
 
-### 1. Clone & Install
+### 1. Clone & Install Dependencies
 
 ```bash
-# Install backend
+# Backend setup
 cd backend
 npm install
 
-# Install frontend
+# Frontend setup
 cd ../frontend
 npm install
 ```
@@ -48,176 +90,106 @@ cd backend
 cp .env.example .env
 ```
 
-Edit `.env`:
+Edit `backend/.env`:
 
 ```env
-# Required: Get from https://console.groq.com/keys
-GROQ_API_KEY=gsk_...
+GROQ_API_KEY=gsk_your_groq_api_key
 
-# Locus Integration (see "Locus Setup" section below)
+# Locus Wallet & Checkout Integration
 LOCUS_API_KEY=your_locus_api_key
 LOCUS_WEBHOOK_SECRET=your_webhook_secret
 LOCUS_WALLET_ID=your_wallet_id
 
-# Set to true to test without real Locus keys
+# Set to true to run with simulated payments & wallet
 DEMO_MODE=true
 ```
 
-### 3. Run the App
+### 3. Launch ForgeOS
 
-Open two terminals:
+Open two terminal windows:
 
 ```bash
-# Terminal 1 — Backend
+# Terminal 1 — Express Backend API (Port 3001)
 cd backend
 npm start
 
-# Terminal 2 — Frontend
+# Terminal 2 — React + Vite Cyberpunk UI (Port 5173)
 cd frontend
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) 🎉
+Navigate to [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 💳 Locus Integration Setup
+## 🌐 Platform Pages & Navigation
 
-ForgeOS integrates with **Locus Checkout** for payments and **Locus Wallets** for revenue routing.
-
-### Step 1: Create a Locus Account
-1. Go to [locusfinance.io](https://locusfinance.io)
-2. Sign up as a developer
-3. Navigate to **Dashboard → API Keys**
-
-### Step 2: Get Your API Keys
-Copy these from your Locus dashboard:
-- `LOCUS_API_KEY` — Your main API key
-- `LOCUS_WEBHOOK_SECRET` — For verifying payment webhooks
-
-### Step 3: Create a Wallet
-1. In Locus Dashboard → **Wallets → Create Wallet**
-2. Copy the Wallet ID → `LOCUS_WALLET_ID`
-
-This wallet receives all revenue from your autonomous business.
-
-### Step 4: Configure Webhooks
-In Locus Dashboard → **Webhooks → Add Endpoint**:
-- URL: `https://your-domain.com/api/webhooks/locus`
-- Events: `checkout.completed`, `payout.processed`
-
-When a customer pays, Locus fires a webhook → ForgeOS auto-triggers AI fulfillment.
-
-### Payment Flow
-```
-Customer clicks "Pay" → Locus Checkout Session created →
-Customer pays → Locus fires webhook → ForgeOS receives event →
-FulfillmentAgent delivers service → Revenue in your Locus wallet
-```
+1. **Launch**: Single-prompt business creation with live multi-agent collaborative negotiation trace.
+2. **Storefront**: Customer-facing digital agency storefront with AI sales agent chat & Locus Checkout payment integration.
+3. **Dashboard**: Agent Command Center featuring live statuses across all 8 agents, order fulfillment queue, and activity feed.
+4. **Memory**: Long-term knowledge explorer showing learned insights, customer profiles, decision history, and memory search.
+5. **CEO Dashboard**: Executive command center displaying Business Health Index, Growth Score, 24h revenue timeline, autonomous decision log, and risk radar.
+6. **Architecture**: Interactive 8-agent topology visualizer, live status indicators, animated communication lines, reasoning chain step inspector, and plugin registry.
 
 ---
 
-## 🏗 Architecture
+## 🏗️ Codebase Structure
 
 ```
-forgeOS/
+ForgeOS/
 ├── backend/
-│   ├── server.js              — Express API server
+│   ├── server.js              — Express API server & continuous autonomy ticker
+│   ├── database.js            — File/Vercel JSON database with memory & execution schema
 │   ├── agents/
-│   │   ├── architect.js       — Business generation (Claude)
-│   │   ├── fulfillment.js     — Service delivery (Claude)
-│   │   └── finance.js         — Locus payment integration
-│   └── .env.example
+│   │   ├── orchestrator.js    — OrchestratorAgent (Collaborative pipeline & self-healing)
+│   │   ├── architect.js       — ArchitectAgent (Business & service tier design)
+│   │   ├── sales.js           — SalesAgent (Storefront inquiries & demand prediction)
+│   │   ├── fulfillment.js     — FulfillmentAgent (Service delivery & artifact creation)
+│   │   ├── finance.js         — FinanceAgent (Locus Checkout & wallet management)
+│   │   ├── memory.js          — MemoryAgent (Long-term vector/keyword knowledge store)
+│   │   ├── reflection.js      — ReflectionAgent (Quality scoring & learning loop)
+│   │   └── ceo.js             — CEOAgent (Autonomous growth & governance engine)
+│   └── plugins/
+│       └── index.js           — Plugin framework (Browser agents, CRM, Social, Email)
 └── frontend/
     └── src/
-        ├── App.jsx             — Main app + navigation
+        ├── App.jsx             — Main navigation & view router
+        ├── index.css           — Cyberpunk theme styling tokens & animations
         └── pages/
-            ├── Launch.jsx      — Business prompt interface
-            ├── Storefront.jsx  — Customer-facing storefront
-            └── Dashboard.jsx  — Agent command center
-```
-
-### API Endpoints
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `POST` | `/api/business/generate` | Launch a new business from a prompt |
-| `GET` | `/api/business` | Get current business config |
-| `POST` | `/api/orders` | Create a new order |
-| `POST` | `/api/orders/:id/fulfill` | Trigger AI fulfillment |
-| `GET` | `/api/orders` | List all orders |
-| `POST` | `/api/chat` | AI sales agent chat |
-| `GET` | `/api/finance/wallet` | Locus wallet balance |
-| `POST` | `/api/webhooks/locus` | Locus payment webhook |
-| `GET` | `/api/logs` | Agent activity feed |
-| `GET` | `/api/agents/activity` | Live agent statuses |
-
----
-
-## 💡 Example Business Prompts
-
-```
-"Premium SEO audit service for Shopify stores"
-"AI logo design studio for tech startups"
-"Business plan writing service for first-time founders"
-"LinkedIn content writing agency for B2B companies"
-"UX audit service for SaaS landing pages"
-"Market research report service for entrepreneurs"
+            ├── Launch.jsx      — Multi-agent collaborative launch page
+            ├── Storefront.jsx  — Customer storefront & AI sales agent
+            ├── Dashboard.jsx   — Live agent status command center
+            ├── MemoryPage.jsx  — Knowledge base & customer profile memory explorer
+            ├── CEODashboard.jsx— Business health index & autonomous decisions log
+            └── ArchitecturePage.jsx — Interactive agent topology map & step trace
 ```
 
 ---
 
-## 🔧 Production Deployment
+## 💳 Payment Gateway & Revenue Routing
 
-### Backend (Railway / Render / Fly.io)
-```bash
-# Set environment variables in your hosting dashboard
-# Deploy from /backend directory
-npm start
+ForgeOS connects with **Locus Checkout** for instant customer checkout and **Locus Wallets** for automated revenue routing:
+
+```
+Customer selects service → Locus Checkout session created →
+Payment settled → Webhook triggered → FulfillmentAgent delivers service →
+Revenue credited to Locus Wallet → Memory & Reflection updated
 ```
 
-### Frontend (Vercel / Netlify)
-```bash
-cd frontend
-npm run build
-# Deploy the dist/ folder
-```
-
-Update `vite.config.js` proxy to point to your production backend URL.
+In `DEMO_MODE=true`, payments and wallet balances are automatically simulated so you can evaluate the entire autonomous operating system without live financial credentials.
 
 ---
 
-## 📊 Demo Mode
+## 💼 Tech Stack
 
-Set `DEMO_MODE=true` in `.env` to run without real Locus credentials:
-- Payments are simulated
-- Wallet shows demo balance
-- All AI fulfillment still works with real Claude API
-- Perfect for hackathon demos
-
----
-
-## 🛠 Tech Stack
-
-- **Frontend**: React 18, Vite, Custom CSS (no UI library — all hand-crafted)
-- **Backend**: Node.js, Express
-- **AI**: Groq Llama 3 70B (via official SDK)
-- **Payments**: Locus Checkout + Locus Wallets
-- **Fonts**: Syncopate, Syne, DM Mono (Google Fonts)
+- **Frontend**: React 18, Vite, Custom Cyberpunk CSS Design System (Syncopate, Syne, DM Mono Google Fonts)
+- **Backend**: Node.js, Express, File/Vercel Database Persistence
+- **AI Intelligence**: Groq Llama 3 70B (via official Groq SDK)
+- **Payment Processing**: Locus Checkout & Locus Wallet API
+- **Deliverables Engine**: Nodemailer (Ethereal test previews), Markdown exporter
 
 ---
 
-## 🔮 What's Next (Post-Hackathon)
+## 📜 License
 
-- **Email delivery**: Nodemailer integration to send deliverables to customers
-- **Stripe fallback**: Optional payment gateway alongside Locus
-- **Business analytics**: Real conversion tracking and A/B testing
-- **Multi-business**: Run multiple autonomous businesses from one ForgeOS account
-- **Customer portal**: Let customers track and download their orders
-- **Auto-marketing**: SalesAgent creates and posts content to attract customers
-
----
-
-Built with ❤️ for the **Locus' Paygentic Hackathon** — LocusFounder Track
-
-*"The best projects are those that make you forget there was no person running the business."*
+MIT License — Built for autonomous enterprise operation.

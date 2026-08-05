@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import Launch from './pages/Launch.jsx';
 import Storefront from './pages/Storefront.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import MemoryPage from './pages/MemoryPage.jsx';
+import CEODashboard from './pages/CEODashboard.jsx';
+import ArchitecturePage from './pages/ArchitecturePage.jsx';
 
 const API = '/api';
 
 export default function App() {
-  const [view, setView] = useState('launch'); // 'launch' | 'storefront' | 'dashboard'
+  const [view, setView] = useState('launch'); // 'launch' | 'storefront' | 'dashboard' | 'memory' | 'ceo' | 'architecture'
   const [business, setBusiness] = useState(null);
   const [orders, setOrders] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -15,7 +18,6 @@ export default function App() {
 
   // Fetch business on load
   useEffect(() => {
-    // Load local cache immediately for zero-flicker UI
     const savedBus = localStorage.getItem('forgeos_business');
     const savedOrders = localStorage.getItem('forgeos_orders');
     const savedLogs = localStorage.getItem('forgeos_logs');
@@ -36,7 +38,6 @@ export default function App() {
           setView('storefront'); 
           localStorage.setItem('forgeos_business', JSON.stringify(b));
         } else {
-          // Check localStorage to restore empty backend
           const saved = localStorage.getItem('forgeos_business');
           if (saved) {
             const parsed = JSON.parse(saved);
@@ -46,7 +47,6 @@ export default function App() {
             const localOrders = localStorage.getItem('forgeos_orders') || '[]';
             const localLogs = localStorage.getItem('forgeos_logs') || '[]';
             
-            // Restore backend with full database dump
             await fetch(`${API}/business/restore`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -59,23 +59,20 @@ export default function App() {
           }
         }
       })
-      .catch(async () => {
-        // Fallback to localStorage already set above
-      });
+      .catch(async () => {});
   }, []);
 
-  // Poll logs and orders when business is active
+  // Poll logs, orders, and wallet when business is active
   useEffect(() => {
     if (!business) return;
     const poll = setInterval(async () => {
       try {
         const [logsRes, ordersRes, walletRes] = await Promise.all([
-          fetch(`${API}/logs`).then(r => r.json()),
-          fetch(`${API}/orders`).then(r => r.json()),
-          fetch(`${API}/finance/wallet`).then(r => r.json()),
+          fetch(`${API}/logs`).then(r => r.json().catch(() => ({ error: 'No business active' }))),
+          fetch(`${API}/orders`).then(r => r.json().catch(() => ({ error: 'No business active' }))),
+          fetch(`${API}/finance/wallet`).then(r => r.json().catch(() => ({ error: 'No business active' }))),
         ]);
         
-        // If the backend has reset and returned error 'No business active', restore it!
         if (logsRes.error === 'No business active' || ordersRes.error === 'No business active') {
           const saved = localStorage.getItem('forgeos_business');
           if (saved) {
@@ -96,7 +93,6 @@ export default function App() {
           return;
         }
         
-        // Defensive synchronization: prevent overwriting local state with empty responses from fresh containers
         if (Array.isArray(logsRes) && (logsRes.length >= logs.length || logs.length === 0)) {
           setLogs(logsRes);
           localStorage.setItem('forgeos_logs', JSON.stringify(logsRes));
@@ -118,13 +114,13 @@ export default function App() {
   const launchBusiness = useCallback(async (prompt) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/business/generate`, {
+      const res = await fetch(`${API}/business/orchestrate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.business) {
         setBusiness(data.business);
         setOrders([]);
         setLogs([]);
@@ -154,35 +150,30 @@ export default function App() {
     });
     let data = await res.json();
     
-    // If backend restarted and lost the business config, restore and retry once!
-    if (data.error === 'No business active') {
-      if (saved) {
-        const b = JSON.parse(saved);
-        const savedOrders = localStorage.getItem('forgeos_orders') || '[]';
-        const savedLogs = localStorage.getItem('forgeos_logs') || '[]';
-        
-        // Restore business config
-        await fetch(`${API}/business/restore`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            currentBusiness: b,
-            orders: JSON.parse(savedOrders),
-            agentLogs: JSON.parse(savedLogs)
-          })
-        });
-        
-        // Retry placing order
-        res = await fetch(`${API}/orders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...orderData,
-            business: b
-          })
-        });
-        data = await res.json();
-      }
+    if (data.error === 'No business active' && saved) {
+      const b = JSON.parse(saved);
+      const savedOrders = localStorage.getItem('forgeos_orders') || '[]';
+      const savedLogs = localStorage.getItem('forgeos_logs') || '[]';
+      
+      await fetch(`${API}/business/restore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentBusiness: b,
+          orders: JSON.parse(savedOrders),
+          agentLogs: JSON.parse(savedLogs)
+        })
+      });
+      
+      res = await fetch(`${API}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...orderData,
+          business: b
+        })
+      });
+      data = await res.json();
     }
     
     if (data.success && data.order) {
@@ -244,6 +235,15 @@ export default function App() {
           onViewStorefront={() => setView('storefront')}
         />
       )}
+      {view === 'memory' && (
+        <MemoryPage business={business} />
+      )}
+      {view === 'ceo' && (
+        <CEODashboard business={business} />
+      )}
+      {view === 'architecture' && (
+        <ArchitecturePage business={business} />
+      )}
     </div>
   );
 }
@@ -251,7 +251,7 @@ export default function App() {
 function Nav({ view, setView, business }) {
   return (
     <nav className="nav">
-      <div className="nav-logo">FORGE<span style={{color:'var(--text-dim)'}}>OS</span></div>
+      <div className="nav-logo">FORGE<span style={{color:'var(--lime)'}}>OS</span></div>
       
       <button
         className={`nav-link ${view === 'launch' ? 'active' : ''}`}
@@ -274,6 +274,24 @@ function Nav({ view, setView, business }) {
           >
             Dashboard
           </button>
+          <button
+            className={`nav-link ${view === 'memory' ? 'active' : ''}`}
+            onClick={() => setView('memory')}
+          >
+            Memory
+          </button>
+          <button
+            className={`nav-link ${view === 'ceo' ? 'active' : ''}`}
+            onClick={() => setView('ceo')}
+          >
+            CEO Dashboard
+          </button>
+          <button
+            className={`nav-link ${view === 'architecture' ? 'active' : ''}`}
+            onClick={() => setView('architecture')}
+          >
+            Architecture
+          </button>
         </>
       )}
       
@@ -285,7 +303,7 @@ function Nav({ view, setView, business }) {
           <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--lime)' }}>
             {business.businessName}
           </span>
-          <span className="badge badge-active">LIVE</span>
+          <span className="badge badge-active">AUTONOMOUS</span>
         </div>
       )}
     </nav>
