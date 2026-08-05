@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 
-const EXAMPLES = [
-  "Premium SEO audit service for e-commerce stores",
-  "AI-powered social media content agency for SaaS startups",
-  "Logo design studio specializing in minimalist tech brands",
-  "Business plan writing service for first-time entrepreneurs",
-  "UX audit service for mobile apps and landing pages",
-  "Email copywriting agency for D2C brands"
+const PRESETS = [
+  { icon: '🤖', title: 'AI SaaS UX Audit', prompt: 'Premium UX and CRO audit service for SaaS landing pages and web apps' },
+  { icon: '⚡', title: 'Shopify SEO Agency', prompt: 'Technical SEO audit and conversion optimization service for e-commerce Shopify stores' },
+  { icon: '🎨', title: 'Startup Brand Studio', prompt: 'AI-driven brand identity, minimalist logo design, and brand guideline studio for tech startups' },
+  { icon: '📈', title: 'B2B Content Engine', prompt: 'High-converting LinkedIn thought leadership and B2B blog copywriting agency' }
 ];
 
 const COLLABORATIVE_AGENT_STEPS = [
@@ -16,20 +14,18 @@ const COLLABORATIVE_AGENT_STEPS = [
   { agent: 'SalesAgent', msg: 'Simulating customer demand & predicting storefront conversion...' },
   { agent: 'ArchitectAgent', msg: 'Applying inter-agent adjustments to service descriptions...' },
   { agent: 'ReflectionAgent', msg: 'Executing quality audit & vulnerability validation...' },
-  { agent: 'CEOAgent', msg: 'Granting executive launch approval & deploying storefront...' }
+  { agent: 'CEOAgent', msg: 'Granting executive launch authorization & deploying storefront...' }
 ];
 
 export default function Launch({ onLaunch, loading }) {
   const [prompt, setPrompt] = useState('');
-  const [exampleIdx, setExampleIdx] = useState(0);
   const [typedExample, setTypedExample] = useState('');
   const [typing, setTyping] = useState(true);
   const [agentStep, setAgentStep] = useState(0);
 
-  // Cycle through example prompts with typing effect
   useEffect(() => {
     if (loading) return;
-    const example = EXAMPLES[exampleIdx % EXAMPLES.length];
+    const example = PRESETS[0].prompt;
     let i = 0;
     setTypedExample('');
     setTyping(true);
@@ -39,78 +35,120 @@ export default function Launch({ onLaunch, loading }) {
       if (i >= example.length) {
         clearInterval(typer);
         setTyping(false);
-        setTimeout(() => setExampleIdx(n => n + 1), 2500);
       }
-    }, 40);
+    }, 35);
     return () => clearInterval(typer);
-  }, [exampleIdx, loading]);
+  }, [loading]);
 
-  // Animate multi-agent collaborative steps during loading
   useEffect(() => {
     if (!loading) { setAgentStep(0); return; }
-    const interval = setInterval(() => setAgentStep(n => n + 1), 1100);
+    const interval = setInterval(() => setAgentStep(n => n + 1), 1000);
     return () => clearInterval(interval);
   }, [loading]);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!prompt.trim() || loading) return;
     onLaunch(prompt.trim());
   };
 
-  return (
-    <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', gap: 0 }}>
+  const handlePresetClick = (presetPrompt) => {
+    setPrompt(presetPrompt);
+    onLaunch(presetPrompt);
+  };
 
-      {/* Glowing orb background accent */}
+  return (
+    <div className="page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', paddingBottom: 60 }}>
+
+      {/* Background ambient lighting */}
       <div style={{
         position: 'fixed', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
-        width: 600, height: 600,
-        background: 'radial-gradient(circle, rgba(170,255,0,0.04) 0%, transparent 70%)',
+        width: 700, height: 700,
+        background: 'radial-gradient(circle, rgba(170,255,0,0.05) 0%, rgba(0,232,204,0.02) 50%, transparent 70%)',
         pointerEvents: 'none'
       }} />
 
-      <div style={{ width: '100%', maxWidth: 720, animation: 'fadeInUp 0.6s ease' }}>
+      <div style={{ width: '100%', maxWidth: 780, animation: 'fadeInUp 0.6s ease', position: 'relative', zIndex: 1 }}>
         
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '6px 16px', borderRadius: 100,
-            border: '1px solid var(--lime-glow)',
-            background: 'var(--lime-dim)',
-            marginBottom: 24
-          }}>
-            <div className="pulse-dot" style={{ width: 6, height: 6 }} />
-            <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              Autonomous Business Operating System
-            </span>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 20 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '6px 16px', borderRadius: 100,
+              border: '1px solid var(--lime-glow)',
+              background: 'var(--lime-dim)',
+            }}>
+              <div className="pulse-dot" style={{ width: 6, height: 6 }} />
+              <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                ForgeOS Autonomous Operating System
+              </span>
+            </div>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '6px 14px', borderRadius: 100,
+              border: '1px solid rgba(255,176,32,0.4)',
+              background: 'rgba(255,176,32,0.12)',
+              fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--amber)', letterSpacing: '0.08em'
+            }}>
+              🏆 1-CLICK DEMO READY
+            </div>
           </div>
 
           <h1 style={{
-            fontSize: 'clamp(32px, 5vw, 56px)',
+            fontSize: 'clamp(34px, 5vw, 58px)',
             lineHeight: 1.1,
             letterSpacing: '0.08em',
-            marginBottom: 20,
-            background: 'linear-gradient(135deg, #F0F0F8 0%, var(--lime) 100%)',
+            marginBottom: 16,
+            background: 'linear-gradient(135deg, #FFFFFF 0%, var(--lime) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>
-            ONE PROMPT.<br />AUTONOMOUS BUSINESS.
+            ONE PROMPT.<br />AUTONOMOUS ENTERPRISE.
           </h1>
 
-          <p style={{ fontSize: 16, color: 'var(--text-dim)', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-            Describe any digital service business. ForgeOS deploys 8 collaborating AI agents that plan, reason, execute, reflect, and grow it autonomously.
+          <p style={{ fontSize: 16, color: 'var(--text-dim)', maxWidth: 540, margin: '0 auto', lineHeight: 1.7 }}>
+            Type any digital service idea. ForgeOS orchestrates 8 collaborating AI agents that build, sell, deliver, reflect, and grow it 24/7.
           </p>
         </div>
 
-        {/* Input form */}
+        {/* 1-Click Preset Demos for Judges */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', textAlign: 'center', marginBottom: 12, letterSpacing: '0.1em' }}>
+            ⚡ 1-CLICK DEMO PRESETS FOR INSTANT LAUNCH
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+            {PRESETS.map((preset, idx) => (
+              <button
+                key={idx}
+                onClick={() => handlePresetClick(preset.prompt)}
+                disabled={loading}
+                style={{
+                  background: 'var(--bg-2)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '12px 10px', textAlign: 'left',
+                  cursor: 'pointer', transition: 'all 0.2s',
+                  display: 'flex', flexDirection: 'column', gap: 4
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--lime)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+              >
+                <div style={{ fontSize: 18 }}>{preset.icon}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{preset.title}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-dimmer)', lineHeight: 1.3 }}>Click to launch ↗</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Custom Input Form */}
         <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
           <div style={{
             background: 'var(--bg-2)',
             border: '1px solid var(--border)',
             borderRadius: 12,
-            padding: 4,
+            padding: 6,
+            boxShadow: '0 0 40px rgba(0,0,0,0.5)',
             transition: 'border-color 0.2s',
             ...(prompt ? { borderColor: 'var(--lime-glow)' } : {})
           }}>
@@ -135,7 +173,7 @@ export default function Launch({ onLaunch, loading }) {
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px' }}>
               <span style={{ fontSize: 11, color: 'var(--text-dimmer)', fontFamily: 'var(--font-mono)' }}>
-                {prompt.length > 0 ? `${prompt.length} chars · Press ↵ to launch` : 'Describe your business idea'}
+                {prompt.length > 0 ? `${prompt.length} chars · Press ↵ to launch` : 'Or type your custom business idea'}
               </span>
               <button
                 type="submit"
@@ -146,7 +184,7 @@ export default function Launch({ onLaunch, loading }) {
                 {loading ? (
                   <>
                     <LoadingSpinner size={14} />
-                    Orchestrating Agents...
+                    Orchestrating 8 Agents...
                   </>
                 ) : (
                   <>
@@ -161,12 +199,12 @@ export default function Launch({ onLaunch, loading }) {
           </div>
         </form>
 
-        {/* Agent loading & negotiation trace animation */}
+        {/* Agent loading & collaborative negotiation trace */}
         {loading && (
           <div style={{ marginTop: 32, animation: 'fadeInUp 0.4s ease' }}>
-            <div className="card">
+            <div className="card" style={{ borderColor: 'var(--lime-glow)', boxShadow: '0 0 30px rgba(170,255,0,0.1)' }}>
               <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', marginBottom: 16, letterSpacing: '0.1em' }}>
-                COLLABORATIVE AGENT NEGOTIATION IN PROGRESS
+                ⚡ MULTI-AGENT COLLABORATIVE NEGOTIATION IN PROGRESS
               </div>
               {COLLABORATIVE_AGENT_STEPS.map((item, i) => (
                 <div key={i} style={{
@@ -200,25 +238,25 @@ export default function Launch({ onLaunch, loading }) {
           </div>
         )}
 
-        {/* How it works */}
+        {/* How it works grid */}
         {!loading && (
-          <div style={{ marginTop: 48 }}>
-            <div style={{ textAlign: 'center', fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', marginBottom: 24, letterSpacing: '0.1em' }}>
-              COLLABORATIVE AGENT ARCHITECTURE
+          <div style={{ marginTop: 44 }}>
+            <div style={{ textAlign: 'center', fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', marginBottom: 20, letterSpacing: '0.1em' }}>
+              8 COLLABORATING AI AGENTS AT WORK
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--border)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               {[
-                { icon: '🧠', label: 'Orchestrator', desc: 'Coordinates 8 agents, plans tasks & handles self-healing retries' },
-                { icon: '💾', label: 'MemoryAgent', desc: 'Stores customer history & learnings retrieved before decisions' },
-                { icon: '🔍', label: 'ReflectionAgent', desc: 'Audits execution outcomes & continuously improves quality' },
-                { icon: '👑', label: 'CEOAgent', desc: 'Runs continuous background autonomy, pricing & growth' },
+                { icon: '🧠', label: 'Orchestrator', desc: 'Central brain & self-healing error retries' },
+                { icon: '💾', label: 'MemoryAgent', desc: 'Long-term customer & knowledge store' },
+                { icon: '🔍', label: 'ReflectionAgent', desc: 'Quality audit & continuous learning loop' },
+                { icon: '👑', label: 'CEOAgent', desc: 'Background autonomy, pricing & growth' },
               ].map((item, i) => (
                 <div key={i} style={{
-                  background: 'var(--bg-2)', padding: '20px 16px', textAlign: 'center'
+                  background: 'var(--bg-2)', padding: '18px 14px', textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: 24, marginBottom: 8 }}>{item.icon}</div>
-                  <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', marginBottom: 6 }}>{item.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5 }}>{item.desc}</div>
+                  <div style={{ fontSize: 22, marginBottom: 6 }}>{item.icon}</div>
+                  <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.4 }}>{item.desc}</div>
                 </div>
               ))}
             </div>

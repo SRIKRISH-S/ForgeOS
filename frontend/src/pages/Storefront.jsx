@@ -212,6 +212,25 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
                   <div style={{ fontSize: 16, color: primary, marginTop: 2, fontWeight: 700 }}>${selectedService.price} Digital Credits</div>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOrderForm({
+                      customerName: 'Judge Evaluator',
+                      customerEmail: 'judge@evaluator.ai',
+                      requirements: 'Comprehensive delivery report and growth roadmap'
+                    });
+                  }}
+                  style={{
+                    background: 'rgba(255,176,32,0.12)', border: '1px solid rgba(255,176,32,0.3)',
+                    color: 'var(--amber)', borderRadius: 4, padding: '4px 8px',
+                    fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer',
+                    marginBottom: 4, textAlign: 'center'
+                  }}
+                >
+                  ⚡ Auto-Fill Judge Test Details
+                </button>
+
                 <input
                   className="input"
                   placeholder="Your Name"
