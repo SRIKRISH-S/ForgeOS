@@ -312,7 +312,7 @@ export async function orchestrateBusinessLaunch(prompt) {
 async function reviewPricingStrategy(businessConfig, walletInfo) {
   try {
     const msg = await client.chat.completions.create({
-      model: 'qwen/qwen3.8-27b',
+      model: 'allam-2-7b',
       max_tokens: 500,
       messages: [{
         role: 'user',
@@ -348,7 +348,7 @@ Respond ONLY with valid JSON:
 async function predictDemand(businessConfig, financeReview) {
   try {
     const msg = await client.chat.completions.create({
-      model: 'qwen/qwen3.8-27b',
+      model: 'allam-2-7b',
       max_tokens: 500,
       messages: [{
         role: 'user',

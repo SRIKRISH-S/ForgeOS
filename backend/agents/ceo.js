@@ -68,7 +68,7 @@ export async function runCEOCycle() {
     await setAgentStatus('ceo', 'negotiating', 'Generating strategic recommendations');
 
     const msg = await client.chat.completions.create({
-      model: 'qwen/qwen3.8-27b',
+      model: 'allam-2-7b',
       max_tokens: 1500,
       messages: [{
         role: 'user',
