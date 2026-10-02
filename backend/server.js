@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+app.use(cors()); // Allow all origins so Vercel can connect to Render
 app.use(express.json());
 const publicDir = process.env.VERCEL ? '/tmp/deliverables' : 'public';
 app.use(process.env.VERCEL ? '/api/deliverables' : '/', express.static(publicDir));
