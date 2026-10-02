@@ -54,7 +54,7 @@ export default function CEODashboard({ business }) {
   return (
     <div className="page">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--amber)', letterSpacing: '0.12em', marginBottom: 6 }}>
             CEOAGENT EXECUTIVE GOVERNANCE & AUTONOMOUS GROWTH
@@ -128,7 +128,7 @@ export default function CEODashboard({ business }) {
       </div>
 
       {/* Main Grid: Decisions Log & Revenue Timeline */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24 }} className="ceo-grid">
         {/* Left: Autonomous Decisions Log */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div>

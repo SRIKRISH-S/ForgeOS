@@ -118,7 +118,7 @@ export default function Launch({ onLaunch, loading }) {
           <div style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', textAlign: 'center', marginBottom: 12, letterSpacing: '0.1em' }}>
             ⚡ 1-CLICK DEMO PRESETS FOR INSTANT LAUNCH
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
             {PRESETS.map((preset, idx) => (
               <button
                 key={idx}
@@ -166,6 +166,7 @@ export default function Launch({ onLaunch, loading }) {
                 fontSize: 16,
                 lineHeight: 1.6,
                 resize: 'none',
+                minHeight: 80,
               }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); }
@@ -244,7 +245,7 @@ export default function Launch({ onLaunch, loading }) {
             <div style={{ textAlign: 'center', fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', marginBottom: 20, letterSpacing: '0.1em' }}>
               8 COLLABORATING AI AGENTS AT WORK
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 1, background: 'var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               {[
                 { icon: '🧠', label: 'Orchestrator', desc: 'Central brain & self-healing error retries' },
                 { icon: '💾', label: 'MemoryAgent', desc: 'Long-term customer & knowledge store' },

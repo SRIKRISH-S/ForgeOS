@@ -93,7 +93,7 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
   return (
     <div className="page">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--lime)', letterSpacing: '0.12em', marginBottom: 6 }}>
             AUTONOMOUS AGENT COMMAND CENTER (8 AGENTS ACTIVE)
@@ -103,7 +103,7 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
             {business.agentPersona || 'Autonomous Business Operating System'}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>FORGEOS WALLET</div>
             <div style={{ fontSize: 22, fontFamily: 'var(--font-display)', color: 'var(--amber)' }}>
@@ -126,7 +126,7 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
       </div>
 
       {/* Main grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }} className="dashboard-grid">
         {/* Left: 8 Agent Grid + Orders */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Active Agents (8-Agent Roster) */}
@@ -303,8 +303,8 @@ function OrderRow({ order, isLast, onFulfill, fulfilling, onView, onViewRoadmap 
 
   return (
     <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr auto auto auto',
+      display: 'flex',
+      flexWrap: 'wrap',
       gap: 12,
       alignItems: 'center',
       padding: '12px 16px',
@@ -312,7 +312,7 @@ function OrderRow({ order, isLast, onFulfill, fulfilling, onView, onViewRoadmap 
       background: 'var(--bg-2)',
       fontSize: 13
     }}>
-      <div>
+      <div style={{ flex: 1, minWidth: 140 }}>
         <div style={{ fontWeight: 500, marginBottom: 2 }}>{order.customerName}</div>
         <div style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
           {order.serviceName}

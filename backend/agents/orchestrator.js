@@ -255,6 +255,9 @@ export async function orchestrateBusinessLaunch(prompt) {
       reflectionResult.overallScore
     );
 
+    // Immediately trigger CEOAgent analysis tailored to this brand-new business
+    runCEOCycle().catch(e => console.error('[CEO Initial Cycle Error]:', e));
+
     // Set all agents to active/ready
     await setAllAgentsActive();
 

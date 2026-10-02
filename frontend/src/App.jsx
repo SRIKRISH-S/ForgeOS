@@ -249,56 +249,79 @@ export default function App() {
 }
 
 function Nav({ view, setView, business }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = (v) => {
+    setView(v);
+    setMenuOpen(false);
+  };
+
   return (
     <nav className="nav">
       <div className="nav-logo">FORGE<span style={{color:'var(--lime)'}}>OS</span></div>
       
       <button
-        className={`nav-link ${view === 'launch' ? 'active' : ''}`}
-        onClick={() => setView('launch')}
+        className="nav-hamburger"
+        onClick={() => setMenuOpen(o => !o)}
+        aria-label="Toggle menu"
       >
-        Launch
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          {menuOpen ? (
+            <path d="M18 6L6 18M6 6l12 12" />
+          ) : (
+            <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
+          )}
+        </svg>
       </button>
-      
-      {business && (
-        <>
-          <button
-            className={`nav-link ${view === 'storefront' ? 'active' : ''}`}
-            onClick={() => setView('storefront')}
-          >
-            Storefront
-          </button>
-          <button
-            className={`nav-link ${view === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setView('dashboard')}
-          >
-            Dashboard
-          </button>
-          <button
-            className={`nav-link ${view === 'memory' ? 'active' : ''}`}
-            onClick={() => setView('memory')}
-          >
-            Memory
-          </button>
-          <button
-            className={`nav-link ${view === 'ceo' ? 'active' : ''}`}
-            onClick={() => setView('ceo')}
-          >
-            CEO Dashboard
-          </button>
-          <button
-            className={`nav-link ${view === 'architecture' ? 'active' : ''}`}
-            onClick={() => setView('architecture')}
-          >
-            Architecture
-          </button>
-        </>
-      )}
+
+      <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
+        <button
+          className={`nav-link ${view === 'launch' ? 'active' : ''}`}
+          onClick={() => navigate('launch')}
+        >
+          Launch
+        </button>
+        
+        {business && (
+          <>
+            <button
+              className={`nav-link ${view === 'storefront' ? 'active' : ''}`}
+              onClick={() => navigate('storefront')}
+            >
+              Storefront
+            </button>
+            <button
+              className={`nav-link ${view === 'dashboard' ? 'active' : ''}`}
+              onClick={() => navigate('dashboard')}
+            >
+              Dashboard
+            </button>
+            <button
+              className={`nav-link ${view === 'memory' ? 'active' : ''}`}
+              onClick={() => navigate('memory')}
+            >
+              Memory
+            </button>
+            <button
+              className={`nav-link ${view === 'ceo' ? 'active' : ''}`}
+              onClick={() => navigate('ceo')}
+            >
+              CEO
+            </button>
+            <button
+              className={`nav-link ${view === 'architecture' ? 'active' : ''}`}
+              onClick={() => navigate('architecture')}
+            >
+              Architecture
+            </button>
+          </>
+        )}
+      </div>
       
       <div className="nav-spacer" />
       
       {business && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="nav-status">
           <div className="pulse-dot" />
           <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--lime)' }}>
             {business.businessName}
@@ -309,3 +332,4 @@ function Nav({ view, setView, business }) {
     </nav>
   );
 }
+

@@ -76,9 +76,9 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
     <div className="page">
       {/* Hero Header */}
       <div style={{
-        textAlign: 'center', padding: '48px 20px 56px',
+        textAlign: 'center', padding: 'clamp(24px, 5vw, 48px) 16px clamp(28px, 5vw, 56px)',
         borderBottom: '1px solid var(--border)',
-        marginBottom: 48,
+        marginBottom: 'clamp(24px, 4vw, 48px)',
         position: 'relative'
       }}>
         <div style={{
@@ -131,20 +131,20 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
         <button
           onClick={onViewDashboard}
           style={{
-            position: 'absolute', top: 16, right: 16,
+            position: 'absolute', top: 12, right: 12,
             background: 'var(--bg-3)', border: '1px solid var(--border)',
-            borderRadius: 4, padding: '6px 12px',
+            borderRadius: 4, padding: '8px 12px',
             color: 'var(--text-dim)', fontSize: 11,
             fontFamily: 'var(--font-mono)', cursor: 'pointer',
-            letterSpacing: '0.05em'
+            letterSpacing: '0.05em', minHeight: 36
           }}
         >
-          ⚡ AGENT DASHBOARD
+          ⚡ DASHBOARD
         </button>
       </div>
 
       {/* Main content: services + order form */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) clamp(280px, 30vw, 380px)', gap: 'clamp(16px, 3vw, 32px)' }} className="storefront-grid">
         {/* Left Column: Services list */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
@@ -446,9 +446,9 @@ function OrderResultModal({ order, business, accent, onClose }) {
       <div style={{
         background: 'var(--bg-2)',
         border: `1px solid ${accent}50`,
-        borderRadius: 14, padding: 32,
+        borderRadius: 'clamp(8px, 2vw, 14px)', padding: 'clamp(16px, 4vw, 32px)',
         maxWidth: 820, width: '100%',
-        maxHeight: '90vh', overflowY: 'auto',
+        maxHeight: '92vh', overflowY: 'auto',
         animation: 'fadeInUp 0.3s ease',
         boxShadow: `0 0 60px ${accent}20`
       }} onClick={e => e.stopPropagation()}>
@@ -578,7 +578,7 @@ function OrderResultModal({ order, business, accent, onClose }) {
                 <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dimmer)', letterSpacing: '0.1em', marginBottom: 12 }}>
                   KEY DELIVERABLE OUTCOMES
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
                   {roadmap.keyOutcomes.map((outcome, i) => (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'flex-start', gap: 12,
