@@ -278,7 +278,7 @@ app.post('/api/orders/:id/roadmap', async (req, res) => {
     const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const msg = await client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'qwen/qwen3.8-27b',
       max_tokens: 1800,
       messages: [{
         role: 'user',

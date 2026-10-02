@@ -111,8 +111,11 @@ export default function App() {
     return () => clearInterval(poll);
   }, [business, orders.length, logs.length]);
 
+  const [launchError, setLaunchError] = useState('');
+
   const launchBusiness = useCallback(async (prompt) => {
     setLoading(true);
+    setLaunchError('');
     try {
       const res = await fetch(`${API}/business/orchestrate`, {
         method: 'POST',
@@ -128,9 +131,12 @@ export default function App() {
         localStorage.setItem('forgeos_business', JSON.stringify(data.business));
         localStorage.setItem('forgeos_orders', '[]');
         localStorage.setItem('forgeos_logs', '[]');
+      } else {
+        setLaunchError(data.error || 'Failed to launch business. Please try again.');
       }
     } catch (err) {
       console.error(err);
+      setLaunchError('Network error — backend may be starting up. Please wait 10s and try again.');
     } finally {
       setLoading(false);
     }
@@ -215,7 +221,7 @@ export default function App() {
     <div>
       <Nav view={view} setView={setView} business={business} />
       {view === 'launch' && (
-        <Launch onLaunch={launchBusiness} loading={loading} />
+        <Launch onLaunch={launchBusiness} loading={loading} error={launchError} />
       )}
       {view === 'storefront' && (
         <Storefront

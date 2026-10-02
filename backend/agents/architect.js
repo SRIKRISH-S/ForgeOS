@@ -21,7 +21,7 @@ export async function architectBusiness(prompt, memoryContext = null) {
     : '';
 
   const message = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'qwen/qwen3.8-27b',
     max_tokens: 2000,
     messages: [
       {
@@ -100,7 +100,7 @@ Respond ONLY with a valid JSON object (no markdown, no explanation). Structure:
  */
 export async function generateBusinessInsight(businessConfig) {
   const message = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'qwen/qwen3.8-27b',
     max_tokens: 500,
     messages: [
       {

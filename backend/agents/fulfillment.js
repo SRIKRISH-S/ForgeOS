@@ -61,7 +61,7 @@ export async function fulfillOrder(order, businessConfig) {
   const agentPersona = businessConfig.agentPersona || 'Expert service provider';
 
   const message = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'qwen/qwen3.8-27b',
     max_tokens: 2000,
     messages: [
       {
@@ -151,7 +151,7 @@ export async function generateSalesResponse(inquiry, businessConfig, history = [
   ];
 
   const message = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'qwen/qwen3.8-27b',
     max_tokens: 400,
     messages
   });

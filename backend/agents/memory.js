@@ -227,7 +227,7 @@ export async function retrieveContext(query, options = {}) {
   if (includeLearnings && db.memory.learnings.length > 0) {
     try {
       const msg = await client.chat.completions.create({
-        model: 'llama-3.3-70b-versatile',
+        model: 'qwen/qwen3.8-27b',
         max_tokens: 600,
         messages: [{
           role: 'user',

@@ -17,7 +17,7 @@ const COLLABORATIVE_AGENT_STEPS = [
   { agent: 'CEOAgent', msg: 'Granting executive launch authorization & deploying storefront...' }
 ];
 
-export default function Launch({ onLaunch, loading }) {
+export default function Launch({ onLaunch, loading, error }) {
   const [prompt, setPrompt] = useState('');
   const [typedExample, setTypedExample] = useState('');
   const [typing, setTyping] = useState(true);
@@ -199,6 +199,24 @@ export default function Launch({ onLaunch, loading }) {
             </div>
           </div>
         </form>
+
+        {/* Error display */}
+        {error && !loading && (
+          <div style={{
+            marginTop: 16,
+            padding: '14px 18px',
+            background: 'var(--red-dim)',
+            border: '1px solid rgba(255,64,96,0.4)',
+            borderRadius: 8,
+            color: 'var(--red)',
+            fontSize: 13,
+            fontFamily: 'var(--font-mono)',
+            textAlign: 'center',
+            animation: 'fadeInUp 0.3s ease'
+          }}>
+            ⚠ {error}
+          </div>
+        )}
 
         {/* Agent loading & collaborative negotiation trace */}
         {loading && (
