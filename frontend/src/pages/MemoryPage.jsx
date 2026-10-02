@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
+import { API } from '../api.js';
 
 export default function MemoryPage({ business }) {
   const [memory, setMemory] = useState(null);
@@ -17,7 +18,7 @@ export default function MemoryPage({ business }) {
   const fetchMemory = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/memory');
+      const res = await fetch(`${API}/memory`);
       const data = await res.json();
       setMemory(data);
     } catch (err) {

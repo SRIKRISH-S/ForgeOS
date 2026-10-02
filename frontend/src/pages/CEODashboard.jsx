@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
+import { API } from '../api.js';
 
 export default function CEODashboard({ business }) {
   const [ceoData, setCeoData] = useState(null);
@@ -16,7 +17,7 @@ export default function CEODashboard({ business }) {
   const fetchCEODashboard = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/ceo/dashboard');
+      const res = await fetch(`${API}/ceo/dashboard`);
       const data = await res.json();
       setCeoData(data);
     } catch (err) {
@@ -29,7 +30,7 @@ export default function CEODashboard({ business }) {
   const handleTriggerCycle = async () => {
     setTriggering(true);
     try {
-      const res = await fetch('/api/ceo/trigger', { method: 'POST' });
+      const res = await fetch(`${API}/ceo/trigger`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         await fetchCEODashboard();
@@ -80,7 +81,7 @@ export default function CEODashboard({ business }) {
               try {
                 // Simulate sample order
                 const svc = business.services?.[0] || { id: 'svc_001', price: 79 };
-                await fetch('/api/orders', {
+                await fetch(`${API}/orders`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({

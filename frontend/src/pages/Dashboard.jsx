@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API } from '../api.js';
 
 const AGENT_COLORS = {
   OrchestratorAgent: '#AAFF00',
@@ -36,8 +37,8 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
     const fetchActivity = async () => {
       try {
         const [actRes, metricsRes] = await Promise.all([
-          fetch('/api/agents/activity').then(r => r.json()),
-          fetch('/api/finance/metrics').then(r => r.json())
+          fetch(`${API}/agents/activity`).then(r => r.json()),
+          fetch(`${API}/finance/metrics`).then(r => r.json())
         ]);
         setAgentStatuses(actRes.agents || []);
         setMetrics(metricsRes);
@@ -65,7 +66,7 @@ export default function Dashboard({ business, orders, logs, wallet, onFulfill, o
       if (order.roadmap) {
         setRoadmapData(d => ({ ...d, [order.id]: order.roadmap }));
       } else {
-        const res = await fetch(`/api/orders/${order.id}/roadmap`, { 
+        const res = await fetch(`${API}/orders/${order.id}/roadmap`, { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ order, business })

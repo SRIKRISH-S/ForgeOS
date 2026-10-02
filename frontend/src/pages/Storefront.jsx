@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API } from '../api.js';
 
 export default function Storefront({ business, onOrder, orders, onViewDashboard }) {
   const [selectedService, setSelectedService] = useState(null);
@@ -55,7 +56,7 @@ export default function Storefront({ business, onOrder, orders, onViewDashboard 
     setChatMsg('');
     setChatLoading(true);
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${API}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -418,7 +419,7 @@ function OrderResultModal({ order, business, accent, onClose }) {
     const fetchRoadmap = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/orders/${order.id}/roadmap`, { 
+        const res = await fetch(`${API}/orders/${order.id}/roadmap`, { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ order, business })

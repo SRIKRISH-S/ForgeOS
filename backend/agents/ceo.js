@@ -68,8 +68,9 @@ export async function runCEOCycle() {
     await setAgentStatus('ceo', 'negotiating', 'Generating strategic recommendations');
 
     const msg = await client.chat.completions.create({
-      model: 'allam-2-7b',
+      model: 'openai/gpt-oss-20b',
       max_tokens: 1500,
+      response_format: { type: 'json_object' },
       messages: [{
         role: 'user',
         content: `You are CEOAgent, the autonomous business growth engine for "${business.businessName}".

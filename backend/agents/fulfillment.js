@@ -61,7 +61,7 @@ export async function fulfillOrder(order, businessConfig) {
   const agentPersona = businessConfig.agentPersona || 'Expert service provider';
 
   const message = await client.chat.completions.create({
-    model: 'allam-2-7b',
+    model: 'openai/gpt-oss-20b',
     max_tokens: 2000,
     messages: [
       {
@@ -151,7 +151,7 @@ export async function generateSalesResponse(inquiry, businessConfig, history = [
   ];
 
   const message = await client.chat.completions.create({
-    model: 'allam-2-7b',
+    model: 'openai/gpt-oss-20b',
     max_tokens: 400,
     messages
   });

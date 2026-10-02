@@ -21,8 +21,9 @@ export async function architectBusiness(prompt, memoryContext = null) {
     : '';
 
   const message = await client.chat.completions.create({
-    model: 'allam-2-7b',
+    model: 'openai/gpt-oss-20b',
     max_tokens: 2000,
+    response_format: { type: 'json_object' },
     messages: [
       {
         role: 'user',
@@ -62,7 +63,7 @@ Respond ONLY with a valid JSON object (no markdown, no explanation). Structure:
       "popular": true
     },
     {
-      "id": "svc_003",
+      "id": "svc_003", 
       "name": "Premium service name", 
       "description": "What exactly the customer gets, 1-2 sentences",
       "price": 149,
@@ -100,7 +101,7 @@ Respond ONLY with a valid JSON object (no markdown, no explanation). Structure:
  */
 export async function generateBusinessInsight(businessConfig) {
   const message = await client.chat.completions.create({
-    model: 'allam-2-7b',
+    model: 'openai/gpt-oss-20b',
     max_tokens: 500,
     messages: [
       {

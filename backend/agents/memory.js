@@ -227,8 +227,9 @@ export async function retrieveContext(query, options = {}) {
   if (includeLearnings && db.memory.learnings.length > 0) {
     try {
       const msg = await client.chat.completions.create({
-        model: 'allam-2-7b',
+        model: 'openai/gpt-oss-20b',
         max_tokens: 600,
+        response_format: { type: 'json_object' },
         messages: [{
           role: 'user',
           content: `You are MemoryAgent. Given a query and a list of past learnings, return the indices of the most relevant learnings (0-indexed) as a JSON array of numbers. Return at most ${maxResults} indices.

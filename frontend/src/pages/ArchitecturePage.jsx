@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
+import { API } from '../api.js';
 
 const AGENT_NODES = [
   { id: 'orchestrator', name: 'OrchestratorAgent', role: 'Central Brain & Multi-Agent Planner', color: '#AAFF00', icon: '🧠', pos: { x: 50, y: 15 } },
@@ -30,7 +31,7 @@ export default function ArchitecturePage({ business }) {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch('/api/architecture/status');
+      const res = await fetch(`${API}/architecture/status`);
       const data = await res.json();
       setStatusData(data);
       if (data.executionRuns?.length > 0) {
@@ -43,7 +44,7 @@ export default function ArchitecturePage({ business }) {
 
   const fetchPlugins = async () => {
     try {
-      const res = await fetch('/api/plugins');
+      const res = await fetch(`${API}/plugins`);
       const data = await res.json();
       setPlugins(data.plugins || []);
     } catch (err) {

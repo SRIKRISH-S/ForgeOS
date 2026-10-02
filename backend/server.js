@@ -15,13 +15,39 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors()); // Allow all origins so Vercel can connect to Render
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Friendly root and health check endpoints
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: 'ForgeOS Autonomous Business Operating System Backend',
+    version: '3.0',
+    agents: 8,
+    active: true,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
 const publicDir = process.env.VERCEL ? '/tmp/deliverables' : 'public';
 app.use(process.env.VERCEL ? '/api/deliverables' : '/', express.static(publicDir));
 
+// Route non-/api requests (except root/health) to /api so both paths work
 app.use((req, res, next) => {
-  if (process.env.VERCEL && !req.url.startsWith('/api')) {
+  if (!req.url.startsWith('/api') && req.url !== '/' && !req.url.startsWith('/health')) {
     req.url = '/api' + req.url;
   }
   next();
@@ -278,8 +304,9 @@ app.post('/api/orders/:id/roadmap', async (req, res) => {
     const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const msg = await client.chat.completions.create({
-      model: 'allam-2-7b',
+      model: 'openai/gpt-oss-20b',
       max_tokens: 1800,
+      response_format: { type: 'json_object' },
       messages: [{
         role: 'user',
         content: `You are ArchitectAgent, an elite AI business strategist. A customer just paid $${order.price} for "${service?.name || order.serviceName}" from ${business.businessName}.

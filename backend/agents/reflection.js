@@ -32,7 +32,7 @@ export async function reflectOnOrder(order, business) {
 
   try {
     const msg = await client.chat.completions.create({
-      model: 'allam-2-7b',
+      model: 'openai/gpt-oss-20b',
       max_tokens: 1200,
       messages: [{
         role: 'user',
@@ -127,8 +127,9 @@ export async function reflectOnBusinessDesign(business) {
 
   try {
     const msg = await client.chat.completions.create({
-      model: 'allam-2-7b',
+      model: 'openai/gpt-oss-20b',
       max_tokens: 800,
+      response_format: { type: 'json_object' },
       messages: [{
         role: 'user',
         content: `You are ReflectionAgent. Analyze this newly generated business design for quality and market viability.
@@ -196,8 +197,9 @@ Respond ONLY with valid JSON:
 export async function reflectOnCEODecision(decision, business) {
   try {
     const msg = await client.chat.completions.create({
-      model: 'allam-2-7b',
+      model: 'openai/gpt-oss-20b',
       max_tokens: 400,
+      response_format: { type: 'json_object' },
       messages: [{
         role: 'user',
         content: `You are ReflectionAgent. Quickly validate this CEO autonomous decision.

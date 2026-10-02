@@ -5,8 +5,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import MemoryPage from './pages/MemoryPage.jsx';
 import CEODashboard from './pages/CEODashboard.jsx';
 import ArchitecturePage from './pages/ArchitecturePage.jsx';
-
-const API = import.meta.env.VITE_API_URL || '/api';
+import { API } from './api.js';
 
 export default function App() {
   const [view, setView] = useState('launch'); // 'launch' | 'storefront' | 'dashboard' | 'memory' | 'ceo' | 'architecture'
