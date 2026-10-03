@@ -426,3 +426,142 @@ hr { border: none; border-top: 1px solid var(--border); }
     gap: 12px;
   }
 }
+
+/* ============================================================
+   PWA & Mobile App Styles
+   ============================================================ */
+
+/* App Logo badge in navbar */
+.nav-logo-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--lime-glow);
+  box-shadow: 0 0 10px rgba(170, 255, 0, 0.25);
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.nav-logo:hover .nav-logo-badge {
+  transform: scale(1.08) rotate(-3deg);
+  box-shadow: 0 0 16px var(--lime);
+}
+
+/* Install App button in navbar */
+.btn-install-app {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--lime-glow);
+  background: linear-gradient(135deg, rgba(170, 255, 0, 0.15), rgba(0, 232, 204, 0.1));
+  color: var(--lime);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-install-app:hover {
+  background: linear-gradient(135deg, rgba(170, 255, 0, 0.25), rgba(0, 232, 204, 0.2));
+  box-shadow: 0 0 15px var(--lime-glow);
+  transform: translateY(-1px);
+}
+
+.install-pulse-icon {
+  font-size: 13px;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+/* Mobile Bottom Dock (App Navigation Bar) */
+.mobile-bottom-dock {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-dock {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(58px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(7, 7, 14, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .mobile-dock-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    gap: 3px;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-dock-btn.active {
+    color: var(--lime);
+  }
+
+  .dock-icon {
+    font-size: 17px;
+    line-height: 1;
+    transition: transform 0.15s ease;
+  }
+
+  .mobile-dock-btn.active .dock-icon {
+    transform: scale(1.15);
+  }
+
+  .dock-indicator {
+    position: absolute;
+    top: 3px;
+    width: 18px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: var(--lime);
+    box-shadow: 0 0 10px var(--lime);
+  }
+
+  /* Extra bottom padding on mobile so dock never overlaps content */
+  .page {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* In mobile view, hide the desktop hamburger menu if bottom dock is present */
+  .nav-hamburger {
+    display: none;
+  }
+}
+
+/* Standalone PWA adjustments (when opened from phone home screen) */
+@media all and (display-mode: standalone) {
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .nav {
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  }
+}
+

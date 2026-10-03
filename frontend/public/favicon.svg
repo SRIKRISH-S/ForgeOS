@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="cyberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#AAFF00" />
+      <stop offset="100%" stop-color="#00E8CC" />
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141424" />
+      <stop offset="100%" stop-color="#07070E" />
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background squircle -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)" stroke="rgba(255,255,255,0.12)" stroke-width="4"/>
+
+  <!-- Circuit neural lines in background -->
+  <g stroke="rgba(170, 255, 0, 0.25)" stroke-width="3" fill="none">
+    <path d="M 120 180 L 180 140 L 256 160 L 332 140 L 392 180" />
+    <path d="M 160 280 L 120 330 L 160 380" />
+    <path d="M 352 280 L 392 330 L 352 380" />
+    <circle cx="180" cy="140" r="5" fill="#AAFF00" />
+    <circle cx="256" cy="160" r="6" fill="#00E8CC" />
+    <circle cx="332" cy="140" r="5" fill="#00E8CC" />
+    <circle cx="120" cy="330" r="4" fill="#AAFF00" />
+    <circle cx="392" cy="330" r="4" fill="#00E8CC" />
+  </g>
+
+  <!-- High-Tech Cyber Anvil -->
+  <g filter="url(#neonGlow)">
+    <!-- Anvil Body -->
+    <path d="M 140 220 
+             L 372 220 
+             C 410 220 420 235 390 250 
+             L 340 270 
+             C 320 280 310 295 310 320 
+             L 350 350 
+             L 350 370 
+             L 162 370 
+             L 162 350 
+             L 202 320 
+             C 202 295 192 280 172 270 
+             L 110 240 
+             C 90 230 110 220 140 220 Z" 
+          fill="url(#cyberGrad)" />
+    
+    <!-- Central Hex Core -->
+    <polygon points="256,260 278,272 278,298 256,310 234,298 234,272" fill="#07070E" stroke="#AAFF00" stroke-width="4"/>
+    <circle cx="256" cy="285" r="5" fill="#AAFF00"/>
+  </g>
+
+  <!-- Brand Wordmark -->
+  <text x="256" y="440" font-family="'Syncopate', sans-serif" font-weight="700" font-size="46" fill="#00E8CC" text-anchor="middle" letter-spacing="10">FORGEOS</text>
+</svg>
